@@ -162,7 +162,7 @@ export default function AboutTherapist() {
           </div>
 
           {/* Illustrative support family photo */}
-          <div className="w-full aspect-[16/9] sm:aspect-[21/9] max-h-80 rounded-xl overflow-hidden border border-white/10 mt-6 relative shadow-lg">
+          <div className="w-full aspect-[3/2] rounded-xl overflow-hidden border border-white/10 mt-6 relative shadow-lg">
             <img 
               src="/media__1780328241086.jpg" 
               alt="Acolhimento Familiar" 

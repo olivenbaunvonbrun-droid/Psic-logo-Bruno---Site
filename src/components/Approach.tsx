@@ -122,7 +122,7 @@ export default function Approach() {
             <p className="text-xs text-luxury-gold/70 font-mono mt-1 uppercase tracking-widest">— Bruno de Oliveira Lima, CRP 05/75885</p>
           </div>
           
-          <div className="w-full md:w-56 aspect-[16/10] rounded-xl overflow-hidden border border-white/10 shrink-0 relative shadow-md">
+          <div className="w-full md:w-56 aspect-[3/2] rounded-xl overflow-hidden border border-white/10 shrink-0 relative shadow-md">
             <img 
               src="/media__1780328241087.jpg" 
               alt="Relação Saudável" 
