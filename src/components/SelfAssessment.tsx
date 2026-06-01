@@ -124,7 +124,7 @@ export default function SelfAssessment() {
                   <CheckSquare className="w-8 h-8 text-luxury-gold" />
                 </div>
 
-                <div className="w-full max-w-md h-36 rounded-xl overflow-hidden border border-white/10 relative shadow-md">
+                <div className="w-full max-w-md aspect-[16/9] rounded-xl overflow-hidden border border-white/10 relative shadow-md">
                   <img 
                     src="/media__1780328241104.jpg" 
                     alt="Perspectiva de Saúde" 

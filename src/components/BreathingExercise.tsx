@@ -160,7 +160,7 @@ export default function BreathingExercise() {
           </div>
 
           {/* Illustrative beach family photo representing relaxation */}
-          <div className="mt-6 rounded-xl overflow-hidden border border-white/10 h-44 w-full max-w-md relative shadow-lg">
+          <div className="mt-6 rounded-xl overflow-hidden border border-white/10 aspect-[16/9] w-full max-w-md relative shadow-lg">
             <img 
               src="/media__1780328241113.jpg" 
               alt="Família na praia" 

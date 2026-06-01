@@ -28,13 +28,6 @@ function ShieldCheckWrapper() {
 export default function PainPoints() {
   const [selectedId, setSelectedId] = useState<string | null>('anxiety');
 
-  const imageMap: Record<string, string> = {
-    anxiety: '/media__1780328241104.jpg',
-    depression: '/media__1780328241113.jpg',
-    trauma: '/media__1780328241086.jpg',
-    dependence: '/media__1780328241087.jpg',
-    selfesteen: '/media__1780328241113.jpg'
-  };
 
   const handleWhatsAppConsult = (title: string) => {
     const text = encodeURIComponent(
@@ -131,18 +124,6 @@ export default function PainPoints() {
                     transition={{ duration: 0.4 }}
                     className="w-full bg-gradient-to-b from-luxury-charcoal to-luxury-black border border-luxury-gold/20 rounded-2xl p-6 sm:p-8 relative shadow-xl flex flex-col gap-6"
                   >
-                    {/* Illustrative Banner Image representing the therapeutic relief/outcome */}
-                    {imageMap[pain.id] && (
-                      <div className="w-full h-48 sm:h-56 rounded-xl overflow-hidden border border-luxury-gold/15 relative shrink-0">
-                        <img 
-                          src={imageMap[pain.id]} 
-                          alt={pain.title} 
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/70 via-transparent to-transparent pointer-events-none" />
-                      </div>
-                    )}
 
                     {/* Glowing gold back light marker */}
                     <div className="absolute top-6 right-6 w-20 h-20 bg-luxury-gold/5 rounded-full blur-xl pointer-events-none" />
