@@ -29,7 +29,12 @@ export default function AboutTherapist() {
     const text = encodeURIComponent(
       "Olá, Bruno! Estava lendo sua biografia profissional e gostaria de agendar um horário com você."
     );
-    window.open(`https://wa.me/5521975249514?text=${text}`, '_blank');
+    const url = `https://wa.me/5521975249514?text=${text}`;
+    if ((window as any).triggerWhatsAppModal) {
+      (window as any).triggerWhatsAppModal(url, "about");
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (

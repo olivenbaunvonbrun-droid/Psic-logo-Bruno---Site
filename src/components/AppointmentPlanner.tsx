@@ -32,9 +32,14 @@ export default function AppointmentPlanner() {
   };
 
   const handleLaunchWhatsApp = (e: React.FormEvent) => {
-    e.preventDefault();
-    const message = encodeURIComponent(generateDraftText());
-    window.open(`https://wa.me/5521975249514?text=${message}`, '_blank');
+     e.preventDefault();
+     const message = encodeURIComponent(generateDraftText());
+     const url = `https://wa.me/5521975249514?text=${message}`;
+     if ((window as any).triggerWhatsAppModal) {
+       (window as any).triggerWhatsAppModal(url, "planner");
+     } else {
+       window.open(url, '_blank');
+     }
   };
 
   return (

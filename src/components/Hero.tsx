@@ -9,7 +9,12 @@ export default function Hero() {
     const text = encodeURIComponent(
       "Olá, Bruno! Acessei seu site e gostaria de agendar uma consulta inicial para cuidar da minha saúde emocional."
     );
-    window.open(`https://wa.me/5521975249514?text=${text}`, '_blank');
+    const url = `https://wa.me/5521975249514?text=${text}`;
+    if ((window as any).triggerWhatsAppModal) {
+      (window as any).triggerWhatsAppModal(url, "hero");
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (

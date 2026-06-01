@@ -72,7 +72,11 @@ export default function SelfAssessment() {
   const handleWhatsAppResult = () => {
     const textToSend = resultDetails.whatsappMsg.replace('totalScore', String(totalScore));
     const cleanUrl = `https://wa.me/5521975249514?text=${encodeURIComponent(textToSend)}`;
-    window.open(cleanUrl, '_blank');
+    if ((window as any).triggerWhatsAppModal) {
+      (window as any).triggerWhatsAppModal(cleanUrl, "assessment");
+    } else {
+      window.open(cleanUrl, '_blank');
+    }
   };
 
   const activeQuestion = ASSESSMENT_QUESTIONS[currentStep - 1];

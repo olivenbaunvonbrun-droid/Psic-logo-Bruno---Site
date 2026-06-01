@@ -32,7 +32,12 @@ export default function PainPoints() {
     const text = encodeURIComponent(
       `Olá, Bruno! Estava lendo sobre "${title}" no seu site e me identifiquei muito com a descrição das dores. Gostaria de agendar uma consulta para trabalharmos nisso.`
     );
-    window.open(`https://wa.me/5521975249514?text=${text}`, '_blank');
+    const url = `https://wa.me/5521975249514?text=${text}`;
+    if ((window as any).triggerWhatsAppModal) {
+      (window as any).triggerWhatsAppModal(url, "pain");
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (

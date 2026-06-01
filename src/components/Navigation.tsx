@@ -44,11 +44,15 @@ export default function Navigation() {
   ];
 
   const handleWhatsAppClick = () => {
-    // Send a message asking for dynamic consultation booking
     const message = encodeURIComponent(
       "Olá, Bruno! Acessei o seu site e gostaria de agendar uma consulta para entender melhor o atendimento terapêutico."
     );
-    window.open(`https://wa.me/5521975249514?text=${message}`, '_blank');
+    const url = `https://wa.me/5521975249514?text=${message}`;
+    if ((window as any).triggerWhatsAppModal) {
+      (window as any).triggerWhatsAppModal(url, "nav");
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (
