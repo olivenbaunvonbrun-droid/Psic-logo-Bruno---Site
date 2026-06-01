@@ -57,9 +57,9 @@ export default function AboutTherapist() {
               <div className="w-full h-full rounded-full overflow-hidden bg-luxury-black relative flex items-center justify-center">
                 {/* Real photo representing Bruno */}
                 <img 
-                  src={photoError ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400" : "/media__1780318365988.jpg"} 
+                  src={photoError ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400" : "/media__1780322063258.jpg"} 
                   alt="Bruno de Oliveira"
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover scale-[1.6] origin-[center_35%]"
                   onError={() => setPhotoError(true)}
                   referrerPolicy="no-referrer"
                 />
