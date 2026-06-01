@@ -117,13 +117,24 @@ export default function Approach() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="text-left">
+          <div className="text-left flex-1">
             <h4 className="text-lg font-serif text-white font-semibold">"Carrego comigo a convicção de que a minha missão profissional é diminuir o sofrimento no mundo."</h4>
             <p className="text-xs text-luxury-gold/70 font-mono mt-1 uppercase tracking-widest">— Bruno de Oliveira Lima, CRP 05/75885</p>
           </div>
+          
+          <div className="w-full md:w-44 h-24 rounded-xl overflow-hidden border border-white/10 shrink-0 relative shadow-md">
+            <img 
+              src="/media__1780328241087.jpg" 
+              alt="Relação Saudável" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/40 via-transparent to-transparent pointer-events-none" />
+          </div>
+
           <a
             href="#alivio"
-            className="shrink-0 bg-transparent hover:bg-luxury-gold border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold hover:text-luxury-black px-6 py-3 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300"
+            className="shrink-0 bg-transparent hover:bg-luxury-gold border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold hover:text-luxury-black px-6 py-3 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 text-center"
           >
             Ver Exercício Prático
           </a>

@@ -123,6 +123,16 @@ export default function SelfAssessment() {
                 <div className="w-16 h-16 rounded-full bg-luxury-gold/10 border border-luxury-gold/30 flex items-center justify-center">
                   <CheckSquare className="w-8 h-8 text-luxury-gold" />
                 </div>
+
+                <div className="w-full max-w-md h-36 rounded-xl overflow-hidden border border-white/10 relative shadow-md">
+                  <img 
+                    src="/media__1780328241104.jpg" 
+                    alt="Perspectiva de Saúde" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/50 via-transparent to-transparent pointer-events-none" />
+                </div>
                 
                 <div className="max-w-md">
                   <h3 className="text-xl font-serif text-white font-medium mb-2">Instrumento de Triagem Reflexivo</h3>

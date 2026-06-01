@@ -158,6 +158,17 @@ export default function BreathingExercise() {
               Este recurso representa o cuidado imediato e empático do consultório de Bruno para acolher você independentemente de onde você esteja.
             </p>
           </div>
+
+          {/* Illustrative beach family photo representing relaxation */}
+          <div className="mt-6 rounded-xl overflow-hidden border border-white/10 h-44 w-full max-w-md relative shadow-lg">
+            <img 
+              src="/media__1780328241113.jpg" 
+              alt="Família na praia" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/50 via-transparent to-transparent pointer-events-none" />
+          </div>
         </div>
 
         {/* Right column: Interactive interactive circle breathe indicator */}

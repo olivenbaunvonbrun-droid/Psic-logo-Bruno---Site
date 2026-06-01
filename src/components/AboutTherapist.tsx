@@ -161,6 +161,17 @@ export default function AboutTherapist() {
             </div>
           </div>
 
+          {/* Illustrative support family photo */}
+          <div className="w-full h-44 rounded-xl overflow-hidden border border-white/10 mt-6 relative shadow-lg">
+            <img 
+              src="/media__1780328241086.jpg" 
+              alt="Acolhimento Familiar" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/50 via-transparent to-transparent pointer-events-none" />
+          </div>
+
           {/* Direct CTA button to book with Bruno */}
           <button
             id="about-me-whatsapp-btn"
