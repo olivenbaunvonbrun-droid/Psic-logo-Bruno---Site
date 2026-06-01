@@ -8,11 +8,11 @@ export default function Approach() {
       icon: <Brain className="w-8 h-8 text-luxury-gold" />,
       title: "TCC de 4ª Geração",
       subtitle: "Flexibilidade Cognitiva e Aceitação Clinicamente Amparada",
-      desc: "Diferente das abordagens antigas que travavam combates diretos e extenuantes contra pensamentos negativos, a 4ª geração da TCC trabalha a desfusão celular e intelectual das crenças ruins. Integramos ferramentas de Atenção Plena (Mindfulness) e Terapia de Aceitação e Compromisso (ACT) para te ensinar a observar o sofrimento de longe, sem se diluir nele.",
+      desc: "Diferente das abordagens antigas que travavam combates diretos e extenuantes contra pensamentos negativos, a 4ª geração da TCC trabalha a desfusão celular e intelectual das crenças ruins. Integramos ferramentas de Atenção Plena e Terapia de Aceitação e Compromisso (ACT) para te ensinar a observar o sofrimento de longe, sem se diluir nele.",
     },
     {
       icon: <HeartHandshake className="w-8 h-8 text-luxury-gold" />,
-      title: "Humanismo & Compassão",
+      title: "Humanismo & Compaixão",
       subtitle: "Olhar Incondicionalmente Seguro e Horizontalizado",
       desc: "Nenhum ser humano pode ser enquadrado puramente sob rótulos ou listas estéreis de sintomas. No consultório de Bruno, a sua vivência é respeitada com máxima dignidade e empatia absoluta. Acolhemos a dor com a elegância de quem entende que sofrer é parte do destino compartilhado do mundo.",
     },

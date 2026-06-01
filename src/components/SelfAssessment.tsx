@@ -49,7 +49,7 @@ export default function SelfAssessment() {
       color: "border-emerald-500/30 text-emerald-400 bg-emerald-500/5",
       desc: "Os resultados sugerem que você está conseguindo manter o equilíbrio psicológico diante dos estresses cotidianos. Há oscilações normais da vida, mas com bom patamar de autonomia interna.",
       advice: "Melhore o autocuidado mantendo rituais de sono regulares, limites claros entre lazer e trabalho, e praticando meditações periódicas.",
-      whatsappMsg: "Olá Bruno! Concluí a autoavaliação do seu site e obtive nível 'Sutil/Estável' (score: totalScore). Gostaria de agendar uma sessão preventiva para manter meu autodesenvolvimento em foco!"
+      whatsappMsg: "Olá, Bruno! Concluí a autoavaliação do seu site e obtive nível 'Sutil/Estável' (pontuação: totalScore). Gostaria de agendar uma sessão preventiva para manter meu autodesenvolvimento em foco!"
     },
     moderado: {
       title: "Carga Emocional Moderada (Alerta)",
@@ -57,7 +57,7 @@ export default function SelfAssessment() {
       color: "border-amber-500/30 text-amber-400 bg-amber-500/5",
       desc: "Percebe-se que as pressões acumuladas (excesso de ansiedade, autocobrança insistente ou dependência sutil das circunstâncias) estão consumindo sua energia vital. Há sinais de piloto automático e desgaste silencioso.",
       advice: "Este é o momento ideal para iniciar a psicoterapia. Evite postergar até que isso se transforme em um esgotamento crônico ou distúrbio de pânico.",
-      whatsappMsg: "Olá Bruno! Concluí a autoavaliação do seu site e obtive nível 'Moderado/Alerta'. Identifiquei desgastes na minha rotina e gostaria de agendar uma sessão de psicoterapia para organizar esses pontos."
+      whatsappMsg: "Olá, Bruno! Concluí a autoavaliação do seu site e obtive nível 'Moderado/Alerta'. Identifiquei desgastes na minha rotina e gostaria de agendar uma sessão de psicoterapia para organizar esses pontos."
     },
     elevado: {
       title: "Balanço Emocional Sobrecarregado",
@@ -65,7 +65,7 @@ export default function SelfAssessment() {
       color: "border-rose-500/30 text-rose-400 bg-rose-500/5",
       desc: "Seu sistema nervoso está emitindo alertas nítidos de exaustão e sofrimento crítico. O peso da ansiedade persistente, os vazios emocionais recorrentes ou a autossabotagem crônica estão travando o seu desenvolvimento e bem-estar habitual.",
       advice: "Buscar acompanhamento terapêutico especializado não é sinal de fraqueza, mas um ato de coragem e autocuidado com sua própria dignidade. Bruno oferece suporte de acolhimento excelente focado nessa regulação.",
-      whatsappMsg: "Olá Bruno! Concluí a autoavaliação do seu site e obtive resultado 'Sobrecarregado/Crítico'. Gostaria de iniciar meu processo de psicoterapia integrativa com você o quanto antes."
+      whatsappMsg: "Olá, Bruno! Concluí a autoavaliação do seu site e obtive resultado 'Sobrecarregado/Crítico'. Gostaria de iniciar meu processo de psicoterapia integrativa com você o quanto antes."
     }
   }[getResultCategory()];
 
@@ -219,7 +219,7 @@ export default function SelfAssessment() {
                     onClick={handleWhatsAppResult}
                     className="flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-4 rounded-full shadow-lg transition cursor-pointer"
                   >
-                    <span>Iniciar Mudança</span>
+                    <span>Parar de adiar minha felicidade</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
 

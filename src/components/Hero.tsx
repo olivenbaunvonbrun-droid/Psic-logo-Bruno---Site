@@ -112,7 +112,7 @@ export default function Hero() {
               className="flex items-center justify-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-sm uppercase tracking-wider px-8 py-4.5 rounded-full shadow-lg hover:shadow-luxury-gold/20 active:scale-95 transition cursor-pointer"
             >
               <MessageSquareHeart className="w-5 h-5" />
-              <span>Retomar o Controle</span>
+              <span>Retomar o controle da minha vida</span>
             </button>
             
             <a
@@ -143,7 +143,7 @@ export default function Hero() {
             <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-b from-[#1c1c20] to-[#0c0c0d] border border-white/[0.05] group flex flex-col justify-end items-center">
               
               <img 
-                src={heroError ? "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600&h=750" : "/media__1779522700148.jpg"} 
+                src={heroError ? "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600&h=750" : "/media__1780315858307.jpg"} 
                 alt="Bruno de Oliveira - Psicólogo Clínico" 
                 className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-102 transition duration-700 pointer-events-none"
                 onError={() => setHeroError(true)}
@@ -201,7 +201,7 @@ export default function Hero() {
               </div>
               <div className="flex-1">
                 <p className="text-[10px] text-luxury-text-muted tracking-wider uppercase font-sans">Formato</p>
-                <p className="text-xs text-luxury-gold-light font-semibold mt-1">Online VIP</p>
+                <p className="text-xs text-luxury-gold-light font-semibold mt-1">Atendimento Online</p>
               </div>
             </div>
           </motion.div>

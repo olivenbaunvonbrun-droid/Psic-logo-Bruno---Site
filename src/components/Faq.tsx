@@ -31,11 +31,11 @@ export default function Faq() {
           </h2>
 
           <p className="text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-sans font-light">
-            Entenda detalhadamente cada detalhe técnico e ético do tratamento antes de iniciar sua primeira sessão com Bruno de Oliveira Lima.
+            Entenda cada detalhe técnico e ético do tratamento antes de iniciar sua primeira sessão com Bruno de Oliveira Lima.
           </p>
         </div>
 
-        {/* Accoridon panels links mapping */}
+        {/* Accordion panels links mapping */}
         <div className="flex flex-col gap-4">
           {FAQS.map((faq, idx) => {
             const isOpen = openIdx === idx;

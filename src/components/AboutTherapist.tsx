@@ -8,6 +8,8 @@ export default function AboutTherapist() {
     "Acompanhamento Psicológico",
     "Desenvolvimento Pessoal",
     "Inteligência Emocional",
+    "Inteligência socioemocional",
+    "Psicologia do Esporte",
     "Tratamento de Traumas",
     "Superação de Tristeza",
     "Lidar com Medos & Fobias",
@@ -18,9 +20,9 @@ export default function AboutTherapist() {
 
   const credentials = [
     { title: "Formação em Neurociências", school: "Investigação dos padrões cerebrais e de sinapses físicas" },
-    { title: "Especialista em TCC de 4ª Geração", school: "Flexibilidade psicológica, ACT e Mindfulness integrados" },
+    { title: "Especialista em TCC de 4ª Geração", school: "Flexibilidade psicológica, ACT e Atenção Plena integrados" },
     { title: "Abordagem Psicanalítica e Humanista", school: "Ressignificação profunda de traumas de infância" },
-    { title: "Atendimento Clínico Filiado ao CFP", school: "Regularizado no e-Psi para sessões online nacionais e internacionais" }
+    { title: "Atendimento em Conformidade com o CFP", school: "Cadastro regularizado no e-Psi para sessões online nacionais e internacionais" }
   ];
 
   const handleWhatsAppClick = () => {
@@ -55,9 +57,9 @@ export default function AboutTherapist() {
               <div className="w-full h-full rounded-full overflow-hidden bg-luxury-black relative flex items-center justify-center">
                 {/* Real photo representing Bruno */}
                 <img 
-                  src={photoError ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400" : "/media__1779521435667.jpg"} 
+                  src={photoError ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400" : "/media__1780318365988.jpg"} 
                   alt="Bruno de Oliveira"
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-top"
                   onError={() => setPhotoError(true)}
                   referrerPolicy="no-referrer"
                 />
@@ -83,10 +85,6 @@ export default function AboutTherapist() {
             {/* Structured details mapping tags from platform */}
             <div className="border-t border-white/[0.05] pt-5 flex flex-col gap-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-luxury-text-muted">Valor Médio da Consulta:</span>
-                <span className="text-luxury-gold font-mono font-semibold">Consulte Pacotes</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
                 <span className="text-luxury-text-muted">Método Predominante:</span>
                 <span className="text-white font-semibold">TCC 4ª Geração</span>
               </div>
@@ -103,7 +101,7 @@ export default function AboutTherapist() {
             {/* Active ethical certification notice */}
             <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/20 text-[10px] text-emerald-400 flex items-center gap-2 justify-center leading-relaxed">
               <Shield className="w-4 h-4 shrink-0 text-emerald-400" />
-              <span>Aprovado para Atendimento Online Conselho CFP</span>
+              <span>Cadastro e-Psi Ativo para Atendimento Online</span>
             </div>
 
           </motion.div>
@@ -126,14 +124,14 @@ export default function AboutTherapist() {
               "Acredito que a terapia não deve ser um processo frio, distante ou mecânico. Sou especialista em TCC integrativa porque entendo que a mente e o corpo estão intimamente interligados, precisando de respostas concretas baseadas na neurociência para reorganizar sinapses físicas e aliviar os desgastes emocionais."
             </p>
             <p>
-              "Eu sei o que é ver a ansiedade paralisar, a exaustão apagar o brilho da vida e a culpa tornar a autocobrança um chicote silencioso. Minha missão de vida não é julgar or enquadrar você em gavetas teóricas, mas sim estender a mão para construir respostas práticas de autonomia emocional e bem-estar."
+              "Eu sei o que é ver a ansiedade paralisar, a exaustão apagar o brilho da vida e a culpa tornar a autocobrança um chicote silencioso. Minha missão de vida não é julgar ou enquadrar você em gavetas teóricas, mas sim estender a mão para construir respostas práticas de autonomia emocional e bem-estar."
             </p>
           </div>
 
           {/* Training list */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
             {credentials.map((cred, idx) => (
-              <div key={idx} className="flex gap-3 items-starts bg-luxury-charcoal/30 p-4 rounded-xl border border-white/5">
+              <div key={idx} className="flex gap-3 items-start bg-luxury-charcoal/30 p-4 rounded-xl border border-white/5">
                 <CheckCircle className="w-5 h-5 text-luxury-gold shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs sm:text-sm font-serif text-white font-semibold leading-normal">{cred.title}</h4>
@@ -162,9 +160,9 @@ export default function AboutTherapist() {
           <button
             id="about-me-whatsapp-btn"
             onClick={handleWhatsAppClick}
-            className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-widest px-8 py-4 px-8 py-4 rounded-full mt-10 transition hover:brightness-110 active:scale-95 shadow-lg shadow-luxury-gold/10 cursor-pointer"
+            className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-widest px-8 py-4 rounded-full mt-10 transition hover:brightness-110 active:scale-95 shadow-lg shadow-luxury-gold/10 cursor-pointer"
           >
-            <span>Iniciar Mudança</span>
+            <span>Voltar a ser protagonista da minha história</span>
           </button>
 
         </div>

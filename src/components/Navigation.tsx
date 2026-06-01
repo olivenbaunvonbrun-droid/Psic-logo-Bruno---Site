@@ -40,7 +40,6 @@ export default function Navigation() {
     { name: 'Abordagem Clínica', href: '#abordagem' },
     { name: 'Recursos de Alívio', href: '#alivio' },
     { name: 'Autoavaliação', href: '#avaliacao' },
-    { name: 'Depoimentos', href: '#depoimentos' },
     { name: 'Dúvidas', href: '#duvidas' },
   ];
 
@@ -62,13 +61,13 @@ export default function Navigation() {
             : 'bg-transparent py-6'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6 xl:gap-8">
           
           {/* Logo Brand Title */}
           <motion.a 
             href="#" 
             id="brand-logo"
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-3 group shrink-0"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
@@ -84,20 +83,20 @@ export default function Navigation() {
               <div className="absolute inset-0 rounded-full border border-luxury-gold/5 scale-125 group-hover:scale-135 transition duration-500" />
             </div>
             <div className="flex flex-col">
-              <span className="text-base sm:text-lg font-cinzel font-bold leading-tight tracking-[0.1em] text-luxury-gold-light group-hover:text-luxury-gold transition duration-300">BRUNO DE OLIVEIRA</span>
-              <span className="text-[9px] font-sans text-luxury-text-muted tracking-[0.25em] font-medium mt-1 uppercase">Psicoterapia Clínica</span>
+              <span className="text-base sm:text-lg font-cinzel font-bold leading-tight tracking-[0.1em] text-luxury-gold-light group-hover:text-luxury-gold transition duration-300 whitespace-nowrap">BRUNO DE OLIVEIRA</span>
+              <span className="text-[9px] font-sans text-luxury-text-muted tracking-[0.15em] font-medium mt-1 uppercase whitespace-nowrap">Psicólogo Clínico • CRP 05/75885</span>
             </div>
           </motion.a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-7">
-            <div className="flex items-center gap-6">
+          <div className="hidden xl:flex items-center gap-3 2xl:gap-5 shrink-0">
+            <div className="flex items-center gap-2.5 2xl:gap-4">
               {navLinks.map((link, idx) => (
                 <motion.a
                   key={link.name}
                   href={link.href}
                   id={`nav-link-${idx}`}
-                  className="text-xs tracking-wider text-luxury-text-muted hover:text-luxury-gold-light transition duration-300 uppercase py-1 relative after:absolute after:bottom-0 after:left-1/2 after:w-0 after:h-[1px] after:bg-luxury-gold after:transition-all hover:after:w-full hover:after:left-0"
+                  className="text-[11px] 2xl:text-xs tracking-wider text-luxury-text-muted hover:text-luxury-gold-light transition duration-300 uppercase py-1 relative after:absolute after:bottom-0 after:left-1/2 after:w-0 after:h-[1px] after:bg-luxury-gold after:transition-all hover:after:w-full hover:after:left-0 whitespace-nowrap"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: idx * 0.05 }}
@@ -110,7 +109,7 @@ export default function Navigation() {
             {/* Time badge representing commitment to prompt care */}
             <motion.div 
               id="clock-badge"
-              className="flex items-center gap-1.5 px-3 py-1 bg-luxury-charcoal/50 border border-luxury-gold/10 rounded-full text-[10px] font-mono text-luxury-gold/80"
+              className="hidden 2xl:flex items-center gap-1.5 px-3 py-1 bg-luxury-charcoal/50 border border-luxury-gold/10 rounded-full text-[10px] font-mono text-luxury-gold/80"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -123,18 +122,18 @@ export default function Navigation() {
             <motion.button
               id="desktop-whatsapp-cta"
               onClick={handleWhatsAppClick}
-              className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-full transition duration-300 shadow-md transform hover:-translate-y-0.5 cursor-pointer"
+              className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black text-[11px] font-semibold uppercase tracking-wider xl:px-3.5 xl:py-1.5 2xl:px-4 2xl:py-2 rounded-full transition duration-300 shadow-md transform hover:-translate-y-0.5 cursor-pointer whitespace-nowrap"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <PhoneCall className="w-3.5 h-3.5" />
-              <span>Iniciar Mudança</span>
+              <span>Iniciar a mudança de que eu preciso</span>
             </motion.button>
           </div>
 
           {/* Mobile Navigation Trigger */}
-          <div className="flex md:hidden items-center gap-3">
+          <div className="flex xl:hidden items-center gap-3">
             {/* Small subtle clock for mobile */}
             <div className="text-[10px] font-mono text-luxury-gold/70 bg-luxury-charcoal border border-luxury-gold/10 py-1 px-2.5 rounded-full">
               {currentTime.split(':').slice(0, 2).join(':') || '12:00'}
@@ -162,7 +161,7 @@ export default function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 top-[72px] z-40 bg-luxury-black/98 backdrop-blur-xl border-t border-luxury-gold/10 md:hidden flex flex-col justify-between p-6 overflow-y-auto"
+            className="fixed inset-0 top-[72px] z-40 bg-luxury-black/98 backdrop-blur-xl border-t border-luxury-gold/10 xl:hidden flex flex-col justify-between p-6 overflow-y-auto"
           >
             <div className="flex flex-col gap-5 pt-4">
               {navLinks.map((link, idx) => (
@@ -195,7 +194,7 @@ export default function Navigation() {
                 className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light active:scale-95 text-luxury-black text-xs font-semibold uppercase tracking-wider py-4 rounded-full transition cursor-pointer"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>Iniciar Mudança</span>
+                <span>Iniciar a mudança de que eu preciso</span>
               </button>
             </div>
           </motion.div>

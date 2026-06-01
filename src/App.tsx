@@ -7,7 +7,6 @@ import PainPoints from './components/PainPoints';
 import BreathingExercise from './components/BreathingExercise';
 import SelfAssessment from './components/SelfAssessment';
 import AppointmentPlanner from './components/AppointmentPlanner';
-import Testimonials from './components/Testimonials';
 import Faq from './components/Faq';
 import Footer from './components/Footer';
 
@@ -44,9 +43,6 @@ export default function App() {
         {/* Elegant appointment customized WhatsApp draft generator form */}
         <AppointmentPlanner />
 
-        {/* Glowing client milestone achievements testimonials */}
-        <Testimonials />
-
         {/* Ethical e-Psi clinical FAQs */}
         <Faq />
 
@@ -73,7 +69,7 @@ export default function App() {
           
           {/* Hover tooltips */}
           <span className="absolute right-16 bg-luxury-charcoal border border-luxury-gold/30 text-luxury-gold-light text-[10px] font-sans tracking-wider uppercase px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
-            Iniciar Mudança
+            Iniciar a mudança de que eu preciso
           </span>
         </a>
       </div>

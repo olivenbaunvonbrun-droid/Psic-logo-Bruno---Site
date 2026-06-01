@@ -172,7 +172,7 @@ export default function PainPoints() {
                       onClick={() => handleWhatsAppConsult(pain.title)}
                       className="w-full sm:w-auto self-start mt-4 flex items-center justify-center gap-2 bg-luxury-charcoal hover:bg-luxury-gold-dark text-white hover:text-luxury-black border border-luxury-gold/30 hover:border-luxury-gold px-6 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                     >
-                      <span>Retomar o Controle</span>
+                      <span>Retomar o controle da minha vida</span>
                       <ArrowRight className="w-3.5 h-3.5 text-luxury-gold group-hover:text-luxury-black" />
                     </button>
 

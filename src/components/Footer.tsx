@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Heart, Shield, Sparkles, MessageCircleCode } from 'lucide-react';
+import { MapPin, Heart, Shield, Send } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const handleWhatsAppClick = () => {
-    const text = encodeURIComponent(
-      "Olá, Bruno! Acessei o rodapé do seu site e gostaria de agendar uma consulta psicoterapêutica."
-    );
-    window.open(`https://wa.me/5521975249514?text=${text}`, '_blank');
+  const [formName, setFormName] = useState('');
+  const [formContact, setFormContact] = useState('');
+  const [formMessage, setFormMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulate contact form submission
+    console.log("Mensagem enviada:", { formName, formContact, formMessage });
+    setIsSubmitted(true);
   };
 
   return (
@@ -35,8 +40,8 @@ export default function Footer() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-base sm:text-lg font-cinzel font-bold leading-tight tracking-[0.1em] text-luxury-gold-light group-hover:text-luxury-gold transition duration-300">BRUNO DE OLIVEIRA</span>
-                <span className="text-[9px] font-sans text-luxury-text-muted tracking-[0.25em] font-medium mt-1 uppercase">Psicoterapia Clínica</span>
+                <span className="text-base sm:text-lg font-cinzel font-bold leading-tight tracking-[0.1em] text-luxury-gold-light group-hover:text-luxury-gold transition duration-300 whitespace-nowrap">BRUNO DE OLIVEIRA</span>
+                <span className="text-[9px] font-sans text-luxury-text-muted tracking-[0.15em] font-medium mt-1 uppercase whitespace-nowrap">Psicólogo Clínico • CRP 05/75885</span>
               </div>
             </a>
 
@@ -44,10 +49,23 @@ export default function Footer() {
               Trabalho guiado pelo rigor da ética, embasado na ciência comportamental e no respeito absoluto pela integridade psicológica e dignidade de cada paciente.
             </p>
 
-            <span className="mt-4 bg-[#141416] border border-luxury-gold/20 text-luxury-gold-light font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg flex items-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-luxury-gold" />
-              <span>CRP Ativo: 05/75885</span>
-            </span>
+            <div className="flex flex-wrap gap-2.5 mt-2">
+              <span className="bg-[#141416] border border-luxury-gold/20 text-luxury-gold-light font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-luxury-gold" />
+                <span>CRP Ativo: 05/75885</span>
+              </span>
+            </div>
+
+            {/* MapPin details moved here for better space utilization */}
+            <div className="flex items-start gap-2.5 text-xs text-luxury-text-muted mt-4 max-w-sm leading-relaxed font-light">
+              <MapPin className="w-4 h-4 text-luxury-gold shrink-0 mt-0.5" />
+              <span>Consultório Executivo Online em Criptografia • Disponível para todo o Brasil e Brasileiros no Exterior.</span>
+            </div>
+
+            {/* Quick CFP seal representation moved here */}
+            <div className="mt-2 p-3.5 rounded-xl bg-luxury-charcoal/40 border border-white/5 text-[10px] text-zinc-500 leading-normal max-w-sm font-light">
+              *Atendimento de acordo com a Resolução CFP nº 11/2018. Cadastro regularizado no e-Psi para realização de psicologia online.
+            </div>
           </div>
 
           {/* Quick links (3 columns) */}
@@ -56,45 +74,57 @@ export default function Footer() {
             <div className="flex flex-col gap-2.5">
               <a href="#terapeuta" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">O Terapeuta</a>
               <a href="#dores" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Dores Tratadas</a>
-              <a href="#abordagem" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Pillars Clínicos</a>
+              <a href="#abordagem" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Pilares Clínicos</a>
               <a href="#alivio" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Exercício de Alívio</a>
               <a href="#avaliacao" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Teste de Autoavaliação</a>
-              <a href="#depoimentos" className="text-xs text-luxury-text-muted hover:text-luxury-gold transition">Depoimentos Reais</a>
             </div>
           </div>
 
-          {/* Contact Details (4 columns) */}
+          {/* Contact Form Column (4 columns) */}
           <div className="md:col-span-4 flex flex-col items-start gap-4">
-            <h4 className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-bold">Atendimento e Contato</h4>
+            <h4 className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-bold">Mensagem Direta</h4>
             
-            <div className="flex flex-col gap-3.5 w-full">
-              
-              <div className="flex items-start gap-3 text-xs text-luxury-text-muted">
-                <MapPin className="w-4 h-4 text-luxury-gold shrink-0 mt-0.5" />
-                <span>Consultório Executivo Online em Criptografia • Disponível para todo o Brasil e Brasileiros no Exterior.</span>
-              </div>
-
-              {/* Tel click triggers directly onto Whatsapp */}
-              <button 
-                onClick={handleWhatsAppClick}
-                className="flex items-center gap-3 text-xs text-luxury-text-muted hover:text-luxury-gold transition text-left cursor-pointer"
-              >
-                <Phone className="w-4 h-4 text-luxury-gold shrink-0" />
-                <span>(21) 97524-9514 (Enviar WhatsApp)</span>
-              </button>
-
-              <div className="flex items-center gap-3 text-xs text-luxury-text-muted">
-                <Mail className="w-4 h-4 text-luxury-gold shrink-0" />
-                <span>bruno.deoliveira.crp@outlook.com</span>
-              </div>
-
-            </div>
-
-            {/* Quick CFP seal representation */}
-            <div className="mt-4 p-3.5 rounded-xl bg-luxury-charcoal/40 border border-white/5 text-[10px] text-zinc-500 leading-normal max-w-xs font-light">
-              *Atendimento de acordo com a Resolução CFP nº 11/2018. Cadastro regularizado no e-Psi para realização de psicologia online.
-            </div>
-
+            <form onSubmit={handleFormSubmit} className="w-full flex flex-col gap-3">
+              {isSubmitted ? (
+                <div className="bg-luxury-gold/5 p-4 rounded-xl border border-luxury-gold/25 text-xs text-luxury-gold-light leading-relaxed font-light text-left">
+                  Obrigado! Sua mensagem foi enviada. Entrarei em contato em breve.
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Seu Nome"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-white/10 bg-luxury-charcoal/30 text-white placeholder-zinc-600 focus:border-luxury-gold focus:outline-none transition text-xs font-light"
+                  />
+                  <input
+                    type="text"
+                    required
+                    placeholder="E-mail ou WhatsApp"
+                    value={formContact}
+                    onChange={(e) => setFormContact(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-white/10 bg-luxury-charcoal/30 text-white placeholder-zinc-600 focus:border-luxury-gold focus:outline-none transition text-xs font-light"
+                  />
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Sua Mensagem..."
+                    value={formMessage}
+                    onChange={(e) => setFormMessage(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-white/10 bg-luxury-charcoal/30 text-white placeholder-zinc-600 focus:border-luxury-gold focus:outline-none transition text-xs font-light resize-none"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-wider py-2.5 rounded-lg transition cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Enviar Mensagem</span>
+                  </button>
+                </>
+              )}
+            </form>
           </div>
 
         </div>

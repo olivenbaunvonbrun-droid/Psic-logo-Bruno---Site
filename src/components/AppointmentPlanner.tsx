@@ -208,7 +208,7 @@ export default function AppointmentPlanner() {
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-widest py-4.5 rounded-xl transition shadow-lg cursor-pointer mt-2"
             >
               <Send className="w-4 h-4" />
-              <span>Confirmar e Iniciar Mudança</span>
+              <span>Enviar e começar a cuidar de mim</span>
             </button>
             <span className="text-[9px] text-zinc-500 font-sans leading-none">Ao clicar, você será redirecionado com segurança para o WhatsApp.</span>
 

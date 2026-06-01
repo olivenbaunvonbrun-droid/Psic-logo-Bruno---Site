@@ -44,7 +44,7 @@ export const PAIN_POINTS: PainPoint[] = [
   {
     id: 'depression',
     title: "Vazio Emocional & Tristeza Profunda",
-    subtitle: "Quando a vida perde o brilho acadêmico e as cores parecem lavadas.",
+    subtitle: "Quando a vida perde o brilho do cotidiano e as cores parecem lavadas.",
     iconName: "CloudRain",
     mainPain: "Cansaço extremo que não passa com o sono, apatia em relação a hobbies que antes traziam alegria, culpa corrosiva e a sensação de carregar um peso pesado no peito.",
     subconsciousMessage: "O cansaço que você sente não é preguiça física: é a sua mente entrando em exaustão após passar anos suprimindo dores, frustrações e tentativas hercúleas de se encaixar.",
@@ -78,7 +78,7 @@ export const PAIN_POINTS: PainPoint[] = [
     iconName: "ShieldAlert",
     mainPain: "Síndrome do impostor no trabalho, comparação obsessiva com o feed impecável das redes sociais alheias, sensação de insuficiência persistente mesmo sendo altamente qualificado.",
     subconsciousMessage: "Sua mente aprendeu que seu valor depende estritamente das suas entregas e performance. Você se tornou seu carrasco mais impiedoso.",
-    approach: "Trabalhamos na desconstrução desse diálogo interno destrutivo usando a Terapia Metacognitiva e o mindfulness. Substituímos o chicote da autocobrança por uma responsabilidade compassiva e extremamente potente.",
+    approach: "Trabalhamos na desconstrução desse diálogo interno destrutivo usando a Terapia Metacognitiva e a Atenção Plena. Substituímos o chicote da autocobrança por uma responsabilidade compassiva e extremamente potente.",
     advice: "DICA PRÁTICA: Da próxima vez que cometer um erro, pergunte-se: 'Se um melhor amigo estivesse nessa situação, eu diria as mesmas palavras duras para ele?' Trate-se com a mesma classe e elegância que trata os outros."
   }
 ];
@@ -145,7 +145,7 @@ export const FAQS: FaqItem[] = [
   {
     category: "Metodologia",
     question: "O que é a TCC de 4ª geração?",
-    answer: "Se a primeira geração focou no comportamento e a segunda nas distorções de pensamento, a 4ª geração da Terapia Cognitivo-Comportamental representa o ápice da integração clínica. Ela une o rigor científico da neurociência comportamental clássica com o mindfulness (atenção plena), Terapia de Aceitação e Compromisso (ACT), autocompaixão profunda e espiritualidade laica. foca não apenas em 'silenciar' sintomas, mas em desenvolver flexibilidade psicológica para construir uma vida autêntica que de fato valha a pena ser vivida."
+    answer: "Se a primeira geração focou no comportamento e a segunda nas distorções de pensamento, a 4ª geração da Terapia Cognitivo-Comportamental representa o ápice da integração clínica. Ela une o rigor científico da neurociência comportamental clássica com a Atenção Plena, Terapia de Aceitação e Compromisso (ACT), autocompaixão profunda e espiritualidade laica. Ela foca não apenas em 'silenciar' sintomas, mas em desenvolver flexibilidade psicológica para construir uma vida autêntica que de fato valha a pena ser vivida."
   },
   {
     category: "Investimento & Atendimento",
