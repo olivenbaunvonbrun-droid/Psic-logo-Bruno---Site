@@ -234,10 +234,10 @@ export default function LandPage() {
                 <span className="text-xs font-sans tracking-[0.25em] uppercase font-semibold text-luxury-gold-light">Compreensão Profunda</span>
               </div>
 
-              {/* Título formatado em exatamente duas linhas */}
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-tight leading-snug mb-8">
-                Já buscou de todas as formas, mas a ansiedade, a tristeza<br className="hidden sm:block" />
-                ou a sobrecarga continuam com você todos os dias?
+              {/* Título formatado estritamente em duas linhas */}
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-serif text-white tracking-tight leading-snug mb-8">
+                <span className="block">Já buscou de todas as formas, mas a ansiedade,</span>
+                <span className="block">a tristeza ou a sobrecarga continuam com você todos os dias?</span>
               </h2>
 
               <div className="text-sm sm:text-base text-zinc-300 leading-relaxed font-light flex flex-col gap-5">
