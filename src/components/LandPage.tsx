@@ -6,19 +6,19 @@ import {
   CheckCircle2, 
   MessageSquareHeart, 
   Brain, 
-  Compass, 
   HeartHandshake, 
   Clock, 
   Video, 
   Lock, 
   Award, 
   ArrowRight,
-  HelpCircle
+  HelpCircle,
+  Zap
 } from 'lucide-react';
 
 export default function LandPage() {
   const whatsappUrl = "https://wa.me/5521975249514?text=" + encodeURIComponent(
-    "Olá, Bruno! Acessei sua landing page de atendimento e gostaria de agendar uma sessão de acolhimento psicológico com você."
+    "Olá, Bruno! Acessei sua página de atendimento e gostaria de agendar uma sessão de acolhimento psicológico com você."
   );
 
   const handleDirectWhatsApp = () => {
@@ -47,7 +47,7 @@ export default function LandPage() {
                 Bruno de Oliveira Lima
               </h1>
               <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono tracking-wider">
-                Psicólogo Clínico • CRP 05/75885
+                Psicólogo de 4ª Geração • CRP 05/75885
               </p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function LandPage() {
               className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-xs text-luxury-gold-light uppercase tracking-widest font-medium mb-6"
             >
               <Sparkles className="w-4 h-4 text-luxury-gold" />
-              <span>TCC de 4ª Geração & Neurociência Comportamental</span>
+              <span>TCC de 4ª Geração & Neurociência Clínica</span>
             </motion.div>
 
             {/* Main Title */}
@@ -91,14 +91,14 @@ export default function LandPage() {
               Descubra a Origem da sua Dor e <span className="gold-gradient-text italic font-medium">Retome o Controle</span> da sua Vida.
             </motion.h1>
 
-            {/* Subtitle */}
+            {/* Subtitle - Atualizado conforme solicitação */}
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-base sm:text-lg md:text-xl text-[#dfcaa7] font-medium tracking-wide mb-8"
             >
-              Acolhimento Psicológico Clínico 100% Online com Bruno de Oliveira (CRP 05/75885)
+              Acolhimento Psicológico Clínico Online com o Psicólogo de 4ª Geração Bruno de Oliveira
             </motion.h2>
 
             {/* Main Visual Display Frame with Therapist Photo */}
@@ -119,7 +119,7 @@ export default function LandPage() {
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-left">
                   <div>
                     <p className="text-white font-serif text-base sm:text-lg font-semibold">Consultório Online Integrativo</p>
-                    <p className="text-xs text-luxury-gold-light font-sans">Sessões individuais por chamada criptografada com sigilo absoluto</p>
+                    <p className="text-xs text-luxury-gold-light font-sans">Sessões individuais por chamada segura com sigilo absoluto</p>
                   </div>
                   <span className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] px-3 py-1 rounded-full hidden sm:flex items-center gap-1.5 backdrop-blur-sm">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -129,16 +129,17 @@ export default function LandPage() {
               </div>
             </motion.div>
 
+            {/* Texto em linha única conforme solicitado */}
             <motion.h3 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl sm:text-2xl font-serif text-white font-medium mb-6"
+              className="text-sm sm:text-base md:text-xl lg:text-2xl font-serif text-white font-medium mb-6 sm:whitespace-nowrap"
             >
               Uma experiência acolhedora, científica e transformadora. Está pronto para começar?
             </motion.h3>
 
-            {/* Direct CTA Button (Sem redirecionamento intermediário) */}
+            {/* Direct CTA Button */}
             <motion.button
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -170,8 +171,9 @@ export default function LandPage() {
               Mais de <span className="gold-gradient-text italic font-medium">+4 mil horas</span> de acolhimento e dedicação clínica.
             </h2>
             
+            {/* Texto atualizado para neurociência clínica */}
             <p className="text-sm sm:text-base text-luxury-text-muted max-w-2xl mx-auto mb-12 font-light">
-              Autoconhecimento, regulação emocional profunda e transformação através da TCC Integrativa de 4ª Geração, amparada pelas neurociências mundiais.
+              Autoconhecimento, regulação emocional profunda e transformação através da TCC Integrativa de 4ª Geração, amparada pela neurociência clínica.
             </p>
 
             {/* Grid de Fotos Ilustrativas com proporção 3:2 sem corte */}
@@ -232,25 +234,24 @@ export default function LandPage() {
                 <span className="text-xs font-sans tracking-[0.25em] uppercase font-semibold text-luxury-gold-light">Compreensão Profunda</span>
               </div>
 
+              {/* Título formatado em exatamente duas linhas */}
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-tight leading-snug mb-8">
-                Já buscou de todas as formas, mas a ansiedade, a tristeza ou a sobrecarga continuam com você todos os dias?
+                Já buscou de todas as formas, mas a ansiedade, a tristeza<br className="hidden sm:block" />
+                ou a sobrecarga continuam com você todos os dias?
               </h2>
 
               <div className="text-sm sm:text-base text-zinc-300 leading-relaxed font-light flex flex-col gap-5">
                 <p>
-                  Muitas pessoas chegam ao meu consultório após passarem anos lutando sozinhas contra pensamentos invasivos, desgastes relacionais e tentativas cansativas de fingir que está tudo bem.
+                  Muitas pessoas passam anos apenas desabafando sobre suas dores, sentem um alívio temporário, mas os problemas continuam se repetindo semana após semana. Na psicologia de 4ª geração, nós abandonamos a mera sala de descompressão.
                 </p>
                 <p>
-                  E você sabe por que isso acontece? Porque a mente humana não se cura através da culpa ou de cobranças mecânicas. É necessário compreender a <strong className="text-white font-medium">raiz inconsciente dos seus gatilhos</strong> e reorganizar os padrões neurobiológicos que sustentam a sua angústia.
+                  O nosso foco é entender <strong className="text-white font-medium">como a sua dificuldade realmente funciona</strong> no dia a dia e treinar novas habilidades psicológicas para que você construa resultados reais e duradouros.
                 </p>
                 <p className="border-l-2 border-luxury-gold pl-4 py-1 text-[#dfcaa7] italic font-serif">
-                  "A sua dor não é fraqueza, preguiça ou falha de caráter. É a sua mente pedindo acolhimento e respostas estruturadas para respirar em paz."
+                  "O objetivo não é apenas desabafar, mas transformar a forma como você reage à sua mente e à sua vida."
                 </p>
                 <p>
-                  O único caminho sustentável para sair desse ciclo é identificar os momentos em que essas defesas foram construídas e aprender ferramentas práticas de regulação emocional para recuperar a sua autonomia.
-                </p>
-                <p className="text-white font-medium">
-                  Em uma sessão clínica individual de 60 minutos, você terá um espaço seguro, horizontal e sem julgamentos para finalmente ser ouvido de verdade.
+                  Em uma sessão clínica individual de <strong className="text-white font-semibold">50 minutos</strong>, você terá um espaço seguro, acolhedor e sem julgamentos para mapear suas dificuldades e começar essa mudança.
                 </p>
               </div>
 
@@ -269,55 +270,57 @@ export default function LandPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 4: O QUE VOCÊ TERÁ (60 MINUTOS DE ATENDIMENTO) */}
+        {/* SEÇÃO 4: O QUE VOCÊ TERÁ (50 MINUTOS DE ATENDIMENTO) */}
         <section className="py-24 bg-luxury-charcoal px-6 border-t border-luxury-gold/10">
           <div className="max-w-6xl mx-auto text-center">
             
             <div className="flex items-center justify-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-luxury-gold" />
-              <span className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-medium">Estrutura Clínica</span>
+              <span className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-medium">Estrutura da Sessão</span>
             </div>
 
+            {/* 50 minutos atualizado */}
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-white tracking-tight mb-4">
-              O que você terá em <span className="gold-gradient-text italic font-medium">60 minutos</span> de atendimento?
+              O que você terá em <span className="gold-gradient-text italic font-medium">50 minutos</span> de atendimento?
             </h2>
             
             <p className="text-xs sm:text-sm uppercase tracking-widest text-[#dfcaa7] font-semibold mb-16">
-              Atendimento Individual, Humanizado e Baseado em Evidências Científicas
+              Atendimento Individual, Prático e com Método Claro de Evolução
             </p>
 
+            {/* 1. Acolhimento | 2. Queixa | 3. Ativação (simplificado conforme documentos) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
               
-              {/* Card 1 */}
+              {/* Card 1: Acolhimento */}
               <div className="bg-luxury-black/60 p-8 rounded-2xl border border-luxury-gold/15 flex flex-col gap-4 shadow-xl hover:border-luxury-gold/40 transition duration-300">
                 <div className="w-14 h-14 rounded-xl bg-luxury-charcoal border border-luxury-gold/20 flex items-center justify-center text-luxury-gold shrink-0">
                   <HeartHandshake className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-serif text-white font-semibold">1. Escuta Ativa & Acolhimento</h3>
+                <h3 className="text-xl font-serif text-white font-semibold">1. Acolhimento</h3>
                 <p className="text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-light">
-                  No primeiro momento, conversamos abertamente para compreender sua história, dores imediatas e rotina. É o seu espaço de total liberdade para desabafar sem receio de julgamentos éticos ou morais.
+                  Criamos um espaço acolhedor, seguro, 100% confidencial e totalmente livre de julgamentos. É o momento de estabelecer confiança e uma parceria de colaboração mútua.
                 </p>
               </div>
 
-              {/* Card 2 */}
+              {/* Card 2: Queixa */}
               <div className="bg-luxury-black/60 p-8 rounded-2xl border border-luxury-gold/15 flex flex-col gap-4 shadow-xl hover:border-luxury-gold/40 transition duration-300">
                 <div className="w-14 h-14 rounded-xl bg-luxury-charcoal border border-luxury-gold/20 flex items-center justify-center text-luxury-gold shrink-0">
                   <Brain className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-serif text-white font-semibold">2. Diagnóstico & Descoberta</h3>
+                <h3 className="text-xl font-serif text-white font-semibold">2. Queixa</h3>
                 <p className="text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-light">
-                  Mapeamos com precisão a origem dos pensamentos automáticos e as armaduras emocionais que mantêm a ansiedade ou o vazio em repetição, iluminando a raiz invisível do sofrimento.
+                  Analisamos situações concretas do seu dia a dia para identificar exatamente o que você pensa, sente e faz, mapeando a raiz dos gatilhos que geram ansiedade e mal-estar.
                 </p>
               </div>
 
-              {/* Card 3 */}
+              {/* Card 3: Ativação */}
               <div className="bg-luxury-black/60 p-8 rounded-2xl border border-luxury-gold/15 flex flex-col gap-4 shadow-xl hover:border-luxury-gold/40 transition duration-300">
                 <div className="w-14 h-14 rounded-xl bg-luxury-charcoal border border-luxury-gold/20 flex items-center justify-center text-luxury-gold shrink-0">
-                  <Compass className="w-7 h-7" />
+                  <Zap className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-serif text-white font-semibold">3. Plano Clínico & Direcionamento</h3>
+                <h3 className="text-xl font-serif text-white font-semibold">3. Ativação</h3>
                 <p className="text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-light">
-                  Construímos juntos um plano de acompanhamento estruturado com ferramentas práticas de Atenção Plena e TCC de 4ª geração, para você aplicar no dia a dia e retomar o protagonismo da sua vida.
+                  Conectamos os padrões com a sua história de vida e iniciamos o treinamento de habilidades práticas (autocontrole, autoestima, enfrentamento) para você assumir o controle da sua vida.
                 </p>
               </div>
 
@@ -333,17 +336,17 @@ export default function LandPage() {
             <div className="bg-gradient-to-b from-luxury-charcoal to-luxury-black border-2 border-luxury-gold/30 rounded-3xl p-8 sm:p-12 shadow-2xl text-center flex flex-col items-center">
               
               <span className="px-4 py-1.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/30 text-luxury-gold-light text-xs font-semibold uppercase tracking-widest mb-4">
-                Sessão Clínica Integrativa
+                Sessão Clínica Individual
               </span>
 
               <h2 className="text-2xl sm:text-3xl font-serif text-white tracking-tight mb-6">
-                Escuta Profunda + Mapeamento de Raiz + Plano Prático
+                1. Acolhimento + 2. Queixa + 3. Ativação
               </h2>
 
               <ul className="text-left w-full max-w-md space-y-3.5 my-6">
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-zinc-200">
                   <CheckCircle2 className="w-5 h-5 text-luxury-gold shrink-0" />
-                  <span><strong>60 Minutos</strong> de Atendimento Individual Dedicado</span>
+                  <span><strong>50 Minutos</strong> de Atendimento Individual Dedicado</span>
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-zinc-200">
                   <Video className="w-5 h-5 text-luxury-gold shrink-0" />
@@ -355,7 +358,7 @@ export default function LandPage() {
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-zinc-200">
                   <Shield className="w-5 h-5 text-luxury-gold shrink-0" />
-                  <span>Cadastro <strong>e-Psi Ativo</strong> para Sessões Nacionais e Internacionais</span>
+                  <span>Cadastro <strong>e-Psi Ativo</strong> para Atendimento em Qualquer Lugar</span>
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-zinc-200">
                   <Sparkles className="w-5 h-5 text-luxury-gold shrink-0" />
@@ -364,7 +367,7 @@ export default function LandPage() {
               </ul>
 
               <p className="text-xs sm:text-sm text-luxury-gold-light font-medium tracking-wide my-4">
-                Dê o primeiro passo para ressignificar a sua dor e viver com plenitude.
+                Dê o primeiro passo para desenvolver novas habilidades e viver com equilíbrio.
               </p>
 
               {/* Botão de Agendamento Direto */}
@@ -377,7 +380,7 @@ export default function LandPage() {
               </button>
 
               <span className="text-[11px] text-zinc-500 mt-3 font-mono">
-                Atendimento particular com emissão de recibo para reembolso
+                Atendimento particular com recibo para reembolso
               </span>
 
             </div>
@@ -404,7 +407,7 @@ export default function LandPage() {
 
               <div className="text-center mt-5">
                 <h3 className="text-xl font-serif text-white font-semibold">Bruno de Oliveira Lima</h3>
-                <p className="text-xs text-luxury-gold-light font-medium tracking-wide">Psicólogo Clínico Integrativo</p>
+                <p className="text-xs text-luxury-gold-light font-medium tracking-wide">Psicólogo de 4ª Geração</p>
                 <p className="text-[11px] text-zinc-500 font-mono mt-0.5">CRP: 05/75885 • e-Psi Regularizado</p>
               </div>
             </div>
@@ -422,13 +425,13 @@ export default function LandPage() {
 
               <div className="text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-light flex flex-col gap-4">
                 <p>
-                  Bruno de Oliveira é psicólogo clínico especialista em TCC Integrativa de 4ª Geração, dedicando sua carreira ao alívio do sofrimento psicológico, superação de traumas e desenvolvimento da inteligência emocional.
+                  Bruno de Oliveira é psicólogo clínico especialista em TCC Integrativa de 4ª Geração, com foco no treinamento ativo de habilidades psicológicas e superação de padrões disfuncionais.
                 </p>
                 <p>
-                  Com formação sólida em Neurociências, Terapia de Aceitação e Compromisso (ACT) e profundidade psicanalítica, seu trabalho une ferramentas práticas cientificamente validadas à empatia incondicional pelo ser humano.
+                  Com fundamentação sólida em Neurociência Clínica e Terapias Baseadas em Processos, seu trabalho une ferramentas práticas cientificamente validadas à empatia incondicional pelo ser humano.
                 </p>
                 <p>
-                  Cada atendimento é um espaço de refúgio e dignidade, estruturado sob medida para a sua história única, visando construir autonomia e paz interna.
+                  Cada sessão é um ambiente colaborativo e acolhedor, onde o paciente aprende a atuar de forma consciente, curando marcas do passado e assumindo o controle do seu futuro.
                 </p>
               </div>
 
@@ -483,13 +486,13 @@ export default function LandPage() {
             {/* Destaques de Confiança */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 my-6 text-xs sm:text-sm text-zinc-300">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Resultados Baseados em Evidências
+                <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Prática Baseada em Evidências
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Acolhimento Humanizado
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Ferramentas Práticas
+                <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Treinamento de Habilidades
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-luxury-gold" /> Totalmente Seguro
@@ -497,7 +500,7 @@ export default function LandPage() {
             </div>
 
             <p className="text-xs sm:text-sm text-luxury-text-muted mb-8 max-w-md font-light">
-              Clique no botão abaixo para agendar a sua sessão diretamente pelo WhatsApp com Bruno de Oliveira Lima.
+              Clique no botão abaixo para agendar a sua sessão diretamente pelo WhatsApp com o psicólogo Bruno de Oliveira.
             </p>
 
             {/* Botão Final de Agendamento */}
