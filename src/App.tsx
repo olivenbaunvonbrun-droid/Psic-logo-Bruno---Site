@@ -11,19 +11,47 @@ import SelfAssessment from './components/SelfAssessment';
 import AppointmentPlanner from './components/AppointmentPlanner';
 import Faq from './components/Faq';
 import Footer from './components/Footer';
+import LandPage from './components/LandPage';
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      return hash === '#landpage' ? '/landpage' : path;
+    }
+    return '/';
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState('');
   const [modalTargetUrl, setModalTargetUrl] = useState('');
 
   useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      setCurrentPath(hash === '#landpage' ? '/landpage' : path);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+
     (window as any).triggerWhatsAppModal = (url: string, category: string) => {
       setModalTargetUrl(url);
       setModalCategory(category);
       setModalOpen(true);
     };
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
   }, []);
+
+  if (currentPath === '/landpage' || currentPath === '/landpage/' || currentPath.startsWith('/landpage')) {
+    return <LandPage />;
+  }
 
   const getModalText = () => {
     switch (modalCategory) {
