@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, 
@@ -6,8 +6,6 @@ import {
   Calendar, 
   Clock, 
   AlertCircle, 
-  CheckSquare, 
-  Square, 
   ArrowLeft, 
   MessageSquareHeart, 
   ExternalLink,
@@ -21,8 +19,9 @@ import {
   Sparkles,
   CalendarDays,
   Shield,
-  Video,
-  Receipt
+  ChevronLeft,
+  ChevronRight,
+  MoveRight
 } from 'lucide-react';
 
 export default function ConditionsAndFees() {
@@ -56,6 +55,46 @@ export default function ConditionsAndFees() {
   });
 
   const [showValidationAlert, setShowValidationAlert] = useState(false);
+
+  // Controle do Carrossel Horizontal
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+
+  const scrollToIndex = (index: number) => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const firstCard = container.querySelector('[data-card-item]') as HTMLElement;
+      const cardWidth = firstCard ? firstCard.offsetWidth : 360;
+      const gap = 24; // 1.5rem (gap-6)
+      container.scrollTo({
+        left: index * (cardWidth + gap),
+        behavior: 'smooth'
+      });
+      setActiveCardIndex(index);
+    }
+  };
+
+  const handleNext = () => {
+    const nextIdx = Math.min(activeCardIndex + 1, 3);
+    scrollToIndex(nextIdx);
+  };
+
+  const handlePrev = () => {
+    const prevIdx = Math.max(activeCardIndex - 1, 0);
+    scrollToIndex(prevIdx);
+  };
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const scrollLeft = container.scrollLeft;
+      const firstCard = container.querySelector('[data-card-item]') as HTMLElement;
+      const cardWidth = firstCard ? firstCard.offsetWidth : 360;
+      const gap = 24;
+      const newIndex = Math.round(scrollLeft / (cardWidth + gap));
+      setActiveCardIndex(Math.min(Math.max(newIndex, 0), 3));
+    }
+  };
 
   const toggleCheck = (key: keyof typeof checkedItems) => {
     setCheckedItems(prev => {
@@ -326,25 +365,74 @@ export default function ConditionsAndFees() {
           </div>
         </section>
 
-        {/* SEÇÃO 2: CARDS DE PLANOS DE ATENDIMENTO (REDESIGN PREMIUM DE LUXO) */}
+        {/* SEÇÃO 2: CARDS DE PLANOS EM ROLAGEM HORIZONTAL ELEGANTE */}
         <section className="mb-20">
           
-          <div className="text-center mb-10">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-white font-semibold tracking-tight">
-              Opções de Organização do Atendimento
-            </h2>
-            <p className="text-xs sm:text-sm text-luxury-gold-light mt-1 font-mono">
-              Selecione o formato mais compatível com o seu momento clínico
-            </p>
+          {/* Header da Seção com Controles de Navegação */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-white font-semibold tracking-tight">
+                Opções de Organização do Atendimento
+              </h2>
+              <p className="text-xs sm:text-sm text-luxury-gold-light mt-1 font-mono flex items-center gap-1.5">
+                <span>Deslize horizontalmente para comparar as 4 opções</span>
+                <MoveRight className="w-3.5 h-3.5 inline animate-pulse text-luxury-gold" />
+              </p>
+            </div>
+
+            {/* Controles de Setas Esquerda/Direita */}
+            <div className="flex items-center gap-2.5 self-center sm:self-auto">
+              <button
+                onClick={handlePrev}
+                disabled={activeCardIndex === 0}
+                aria-label="Plano anterior"
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                  activeCardIndex === 0
+                    ? 'border-white/10 text-zinc-600 cursor-not-allowed bg-black/20'
+                    : 'border-luxury-gold/40 text-luxury-gold-light hover:text-luxury-black hover:bg-luxury-gold hover:border-luxury-gold shadow-md active:scale-95'
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="text-xs font-mono text-zinc-400 px-2 select-none">
+                <span className="text-luxury-gold font-bold">{activeCardIndex + 1}</span> / 4
+              </div>
+
+              <button
+                onClick={handleNext}
+                disabled={activeCardIndex === 3}
+                aria-label="Próximo plano"
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                  activeCardIndex === 3
+                    ? 'border-white/10 text-zinc-600 cursor-not-allowed bg-black/20'
+                    : 'border-luxury-gold/40 text-luxury-gold-light hover:text-luxury-black hover:bg-luxury-gold hover:border-luxury-gold shadow-md active:scale-95'
+                }`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* CONTAINER COM ROLAGEM HORIZONTAL */}
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex gap-6 overflow-x-auto snap-x snap-mandatory py-4 px-1 scroll-smooth no-scrollbar"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
 
             {/* ========================================================= */}
             {/* CARD 1: CONSULTA AVULSA */}
             {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 hover:from-luxury-gold/60 hover:via-luxury-gold/30 hover:to-luxury-gold/15 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/10 flex flex-col">
-              
+            <div 
+              data-card-item
+              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 hover:from-luxury-gold/60 hover:via-luxury-gold/30 hover:to-luxury-gold/15 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/10 flex flex-col"
+            >
               <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
@@ -444,8 +532,10 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 2: ACOMPANHAMENTO MENSAL */}
             {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col">
-              
+            <div 
+              data-card-item
+              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
+            >
               <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
@@ -546,8 +636,10 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 3: ACOMPANHAMENTO BIMESTRAL */}
             {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col">
-              
+            <div 
+              data-card-item
+              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
+            >
               <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
@@ -648,8 +740,10 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 4: ACOMPANHAMENTO TRIMESTRAL */}
             {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col">
-              
+            <div 
+              data-card-item
+              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
+            >
               <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
@@ -748,6 +842,23 @@ export default function ConditionsAndFees() {
             </div>
 
           </div>
+
+          {/* Dots de Paginação Interativos */}
+          <div className="flex items-center justify-center gap-2.5 mt-8">
+            {[0, 1, 2, 3].map((index) => (
+              <button
+                key={index}
+                onClick={() => scrollToIndex(index)}
+                aria-label={`Ir para o plano ${index + 1}`}
+                className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  activeCardIndex === index 
+                    ? 'w-8 bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-md shadow-luxury-gold/30' 
+                    : 'w-2.5 bg-zinc-700 hover:bg-luxury-gold/40'
+                }`}
+              />
+            ))}
+          </div>
+
         </section>
 
         {/* SEÇÃO 3: INFORMAÇÕES IMPORTANTES (CONTRATUAIS E ÉTICAS) */}
