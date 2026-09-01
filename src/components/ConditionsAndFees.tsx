@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, 
@@ -18,10 +18,7 @@ import {
   Layers,
   Sparkles,
   CalendarDays,
-  Shield,
-  ChevronLeft,
-  ChevronRight,
-  MoveRight
+  Shield
 } from 'lucide-react';
 
 export default function ConditionsAndFees() {
@@ -55,46 +52,6 @@ export default function ConditionsAndFees() {
   });
 
   const [showValidationAlert, setShowValidationAlert] = useState(false);
-
-  // Controle do Carrossel Horizontal
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-
-  const scrollToIndex = (index: number) => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const firstCard = container.querySelector('[data-card-item]') as HTMLElement;
-      const cardWidth = firstCard ? firstCard.offsetWidth : 360;
-      const gap = 24; // 1.5rem (gap-6)
-      container.scrollTo({
-        left: index * (cardWidth + gap),
-        behavior: 'smooth'
-      });
-      setActiveCardIndex(index);
-    }
-  };
-
-  const handleNext = () => {
-    const nextIdx = Math.min(activeCardIndex + 1, 3);
-    scrollToIndex(nextIdx);
-  };
-
-  const handlePrev = () => {
-    const prevIdx = Math.max(activeCardIndex - 1, 0);
-    scrollToIndex(prevIdx);
-  };
-
-  const handleScroll = () => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const scrollLeft = container.scrollLeft;
-      const firstCard = container.querySelector('[data-card-item]') as HTMLElement;
-      const cardWidth = firstCard ? firstCard.offsetWidth : 360;
-      const gap = 24;
-      const newIndex = Math.round(scrollLeft / (cardWidth + gap));
-      setActiveCardIndex(Math.min(Math.max(newIndex, 0), 3));
-    }
-  };
 
   const toggleCheck = (key: keyof typeof checkedItems) => {
     setCheckedItems(prev => {
@@ -137,7 +94,7 @@ export default function ConditionsAndFees() {
 
       {/* HEADER INSTITUCIONAL RESERVADO */}
       <header className="w-full bg-luxury-charcoal/90 backdrop-blur-md border-b border-luxury-gold/20 sticky top-0 z-50 py-3.5 px-6">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <a 
               href="/landpage"
@@ -175,7 +132,7 @@ export default function ConditionsAndFees() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 py-12 sm:py-16">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
         {/* CABEÇALHO DA PÁGINA DE MODALIDADES */}
         <section className="text-center max-w-3xl mx-auto mb-14">
@@ -365,142 +322,94 @@ export default function ConditionsAndFees() {
           </div>
         </section>
 
-        {/* SEÇÃO 2: CARDS DE PLANOS EM ROLAGEM HORIZONTAL ELEGANTE */}
+        {/* SEÇÃO 2: OS 4 CARDS HORIZONTALMENTE NA PÁGINA (4 COLUNAS SIMULTÂNEAS) */}
         <section className="mb-20">
           
-          {/* Header da Seção com Controles de Navegação */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-white font-semibold tracking-tight">
-                Opções de Organização do Atendimento
-              </h2>
-              <p className="text-xs sm:text-sm text-luxury-gold-light mt-1 font-mono flex items-center gap-1.5">
-                <span>Deslize horizontalmente para comparar as 4 opções</span>
-                <MoveRight className="w-3.5 h-3.5 inline animate-pulse text-luxury-gold" />
-              </p>
-            </div>
-
-            {/* Controles de Setas Esquerda/Direita */}
-            <div className="flex items-center gap-2.5 self-center sm:self-auto">
-              <button
-                onClick={handlePrev}
-                disabled={activeCardIndex === 0}
-                aria-label="Plano anterior"
-                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                  activeCardIndex === 0
-                    ? 'border-white/10 text-zinc-600 cursor-not-allowed bg-black/20'
-                    : 'border-luxury-gold/40 text-luxury-gold-light hover:text-luxury-black hover:bg-luxury-gold hover:border-luxury-gold shadow-md active:scale-95'
-                }`}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              <div className="text-xs font-mono text-zinc-400 px-2 select-none">
-                <span className="text-luxury-gold font-bold">{activeCardIndex + 1}</span> / 4
-              </div>
-
-              <button
-                onClick={handleNext}
-                disabled={activeCardIndex === 3}
-                aria-label="Próximo plano"
-                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                  activeCardIndex === 3
-                    ? 'border-white/10 text-zinc-600 cursor-not-allowed bg-black/20'
-                    : 'border-luxury-gold/40 text-luxury-gold-light hover:text-luxury-black hover:bg-luxury-gold hover:border-luxury-gold shadow-md active:scale-95'
-                }`}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="text-center mb-10">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-white font-semibold tracking-tight">
+              Opções de Organização do Atendimento
+            </h2>
+            <p className="text-xs sm:text-sm text-luxury-gold-light mt-1 font-mono">
+              Compare as 4 modalidades e escolha o formato adequado à sua rotina
+            </p>
           </div>
 
-          {/* CONTAINER COM ROLAGEM HORIZONTAL */}
-          <div 
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className="flex gap-6 overflow-x-auto snap-x snap-mandatory py-4 px-1 scroll-smooth no-scrollbar"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
-            }}
-          >
+          {/* GRID COM OS 4 CARDS LADO A LADO NA MESMA LINHA HORIZONTAL */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 items-stretch">
 
             {/* ========================================================= */}
             {/* CARD 1: CONSULTA AVULSA */}
             {/* ========================================================= */}
-            <div 
-              data-card-item
-              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 hover:from-luxury-gold/60 hover:via-luxury-gold/30 hover:to-luxury-gold/15 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/10 flex flex-col"
-            >
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
+            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
+              
+              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
+                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
 
                 <div>
                   {/* Header Row */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="px-3 py-1 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-semibold">
-                      Atendimento Pontual
+                  <div className="flex items-center justify-between gap-1.5 mb-3">
+                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      Pontual
                     </span>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                      <Clock className="w-3.5 h-3.5 text-luxury-gold" /> 50 min
+                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                      <Clock className="w-3 h-3 text-luxury-gold" /> 50 min
                     </span>
                   </div>
 
                   {/* Icon & Title */}
-                  <div className="flex items-start gap-3.5 mb-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <User className="w-6 h-6" />
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                      <User className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
+                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
                         Consulta avulsa
                       </h3>
-                      <p className="text-xs text-zinc-400 font-mono mt-0.5">
+                      <p className="text-[10px] text-zinc-400 font-mono">
                         1 atendimento individual
                       </p>
                     </div>
                   </div>
 
                   {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/20 rounded-2xl p-4 sm:p-5 my-5 shadow-inner">
-                    <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários da Sessão
+                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/20 rounded-xl p-3.5 my-3.5 shadow-inner">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                      Honorários
                     </div>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-sm font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">147</span>
-                      <span className="text-sm font-serif text-luxury-gold-light">,00</span>
+                    <div className="flex items-baseline gap-0.5 mt-0.5">
+                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">147</span>
+                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
-                    <div className="mt-2 text-[11px] text-zinc-400 font-mono">
-                      Pagamento único referente a 1 sessão
+                    <div className="mt-1 text-[10px] text-zinc-400 font-mono">
+                      Pagamento único por sessão
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-zinc-300 font-light leading-relaxed mb-6">
-                    Indicada para primeiro atendimento, atendimento pontual, retorno isolado ou para quem deseja conhecer o método antes de iniciar um acompanhamento contínuo.
+                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                    Indicada para primeiro atendimento, retorno isolado ou para quem deseja conhecer o método antes de iniciar acompanhamento contínuo.
                   </p>
 
                   {/* Features List */}
-                  <ul className="space-y-2.5 mb-8 text-xs text-zinc-300 font-light border-t border-luxury-gold/10 pt-4">
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
+                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
                       <span>50 minutos de escuta clínica dedicada</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Emissão de recibo oficial CRP para reembolso</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Recibo oficial CRP para reembolso</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Plataforma individual e 100% criptografada</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Plataforma segura e criptografada</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Alinhamento de dia e horário pelo WhatsApp</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Agendamento rápido no WhatsApp</span>
                     </li>
                   </ul>
                 </div>
@@ -509,19 +418,19 @@ export default function ConditionsAndFees() {
                 <div>
                   <button
                     onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/0NHcZTh')}
-                    className={`w-full flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
                         : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
                     }`}
                   >
-                    {isAllChecked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    <span>Formalizar consulta avulsa</span>
-                    <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                    <span>Formalizar avulsa</span>
+                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
-                    <p className="text-[10px] text-zinc-500 text-center font-mono mt-2">
-                      Marque as confirmações acima para habilitar
+                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
+                      Marque as 4 confirmações acima
                     </p>
                   )}
                 </div>
@@ -532,79 +441,77 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 2: ACOMPANHAMENTO MENSAL */}
             {/* ========================================================= */}
-            <div 
-              data-card-item
-              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
-            >
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
+            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
+              
+              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
+                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
 
                 <div>
                   {/* Header Row */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="px-3 py-1 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-semibold">
-                      Frequência Semanal
+                  <div className="flex items-center justify-between gap-1.5 mb-3">
+                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      Semanal
                     </span>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                      <CalendarDays className="w-3.5 h-3.5 text-luxury-gold" /> 30 dias
+                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 30 dias
                     </span>
                   </div>
 
                   {/* Icon & Title */}
-                  <div className="flex items-start gap-3.5 mb-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Calendar className="w-6 h-6" />
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                      <Calendar className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
-                        Acompanhamento mensal
+                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
+                        Mensal
                       </h3>
-                      <p className="text-xs text-zinc-400 font-mono mt-0.5">
+                      <p className="text-[10px] text-zinc-400 font-mono">
                         4 atendimentos no mês
                       </p>
                     </div>
                   </div>
 
                   {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-2xl p-4 sm:p-5 my-5 shadow-inner">
-                    <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários do Plano (4 Sessões)
+                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                      Honorários (4 Sessões)
                     </div>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-sm font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">420</span>
-                      <span className="text-sm font-serif text-luxury-gold-light">,00</span>
+                    <div className="flex items-baseline gap-0.5 mt-0.5">
+                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">420</span>
+                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
-                    <div className="mt-2.5 pt-2 border-t border-luxury-gold/15 flex items-center gap-1.5 text-xs text-luxury-gold-light font-sans font-medium">
-                      <CreditCard className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Possibilidade em 2 pagamentos de R$ 210,00</span>
+                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
+                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
+                      <span>Em 2x de R$ 210,00</span>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-zinc-300 font-light leading-relaxed mb-6">
-                    Indicado para quem deseja iniciar ou manter um processo terapêutico com frequência semanal, favorecendo continuidade, vínculo e acompanhamento clínico ao longo do mês.
+                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                    Indicado para quem deseja iniciar ou manter processo terapêutico semanal, favorecendo continuidade e vínculo clínico.
                   </p>
 
                   {/* Features List */}
-                  <ul className="space-y-2.5 mb-8 text-xs text-zinc-300 font-light border-t border-luxury-gold/10 pt-4">
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>4 atendimentos clínicos ao longo de 30 dias</span>
+                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>4 sessões individuais (~1x por semana)</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Estruturação contínua e vínculo terapêutico</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Estruturação contínua e vínculo clínico</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Emissão de recibos para reembolso no convênio</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Recibo mensal para reembolso convênio</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Horário semanal fixo reservado para você</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Horário semanal fixo reservado</span>
                     </li>
                   </ul>
                 </div>
@@ -613,19 +520,19 @@ export default function ConditionsAndFees() {
                 <div>
                   <button
                     onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/Bf7QgxM')}
-                    className={`w-full flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
                         : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
                     }`}
                   >
-                    {isAllChecked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    <span>Formalizar acompanhamento mensal</span>
-                    <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                    <span>Formalizar mensal</span>
+                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
-                    <p className="text-[10px] text-zinc-500 text-center font-mono mt-2">
-                      Marque as confirmações acima para habilitar
+                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
+                      Marque as 4 confirmações acima
                     </p>
                   )}
                 </div>
@@ -636,79 +543,77 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 3: ACOMPANHAMENTO BIMESTRAL */}
             {/* ========================================================= */}
-            <div 
-              data-card-item
-              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
-            >
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
+            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
+              
+              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
+                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
 
                 <div>
                   {/* Header Row */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="px-3 py-1 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-semibold">
-                      Aprofundamento Clínico
+                  <div className="flex items-center justify-between gap-1.5 mb-3">
+                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      Bimestral
                     </span>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                      <CalendarDays className="w-3.5 h-3.5 text-luxury-gold" /> 60 dias
+                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 60 dias
                     </span>
                   </div>
 
                   {/* Icon & Title */}
-                  <div className="flex items-start gap-3.5 mb-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Layers className="w-6 h-6" />
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                      <Layers className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
-                        Acompanhamento bimestral
+                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
+                        Bimestral
                       </h3>
-                      <p className="text-xs text-zinc-400 font-mono mt-0.5">
-                        8 atendimentos ao longo de 2 meses
+                      <p className="text-[10px] text-zinc-400 font-mono">
+                        8 atendimentos (2 meses)
                       </p>
                     </div>
                   </div>
 
                   {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-2xl p-4 sm:p-5 my-5 shadow-inner">
-                    <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários do Plano (8 Sessões)
+                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                      Honorários (8 Sessões)
                     </div>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-sm font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">740</span>
-                      <span className="text-sm font-serif text-luxury-gold-light">,00</span>
+                    <div className="flex items-baseline gap-0.5 mt-0.5">
+                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">740</span>
+                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
-                    <div className="mt-2.5 pt-2 border-t border-luxury-gold/15 flex items-center gap-1.5 text-xs text-luxury-gold-light font-sans font-medium">
-                      <CreditCard className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Possibilidade em 2x de R$ 370,00 ou 4x de R$ 185,00</span>
+                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
+                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
+                      <span>2x R$ 370 ou 4x R$ 185</span>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-zinc-300 font-light leading-relaxed mb-6">
-                    Indicado para quem deseja maior continuidade no acompanhamento, permitindo aprofundar a compreensão dos padrões emocionais, relacionais e comportamentais trabalhados no processo terapêutico.
+                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                    Indicado para maior continuidade, permitindo aprofundar compreensão dos padrões emocionais e comportamentais.
                   </p>
 
                   {/* Features List */}
-                  <ul className="space-y-2.5 mb-8 text-xs text-zinc-300 font-light border-t border-luxury-gold/10 pt-4">
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>8 atendimentos clínicos no período de 60 dias</span>
+                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>8 atendimentos clínicos em 60 dias</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Aprofundamento de esquemas e regulação emocional</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Aprofundamento de esquemas mentais</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Emissão de recibos mensais para reembolso</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Emissão de recibos mensais oficiais</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Acompanhamento sistemático e personalizado</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Acompanhamento personalizado</span>
                     </li>
                   </ul>
                 </div>
@@ -717,19 +622,19 @@ export default function ConditionsAndFees() {
                 <div>
                   <button
                     onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/J1OGbSJ')}
-                    className={`w-full flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
                         : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
                     }`}
                   >
-                    {isAllChecked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    <span>Formalizar acompanhamento bimestral</span>
-                    <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                    <span>Formalizar bimestral</span>
+                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
-                    <p className="text-[10px] text-zinc-500 text-center font-mono mt-2">
-                      Marque as confirmações acima para habilitar
+                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
+                      Marque as 4 confirmações acima
                     </p>
                   )}
                 </div>
@@ -740,79 +645,77 @@ export default function ConditionsAndFees() {
             {/* ========================================================= */}
             {/* CARD 4: ACOMPANHAMENTO TRIMESTRAL */}
             {/* ========================================================= */}
-            <div 
-              data-card-item
-              className="w-[85vw] max-w-[370px] sm:w-[370px] md:w-[380px] shrink-0 snap-center relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col"
-            >
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden">
+            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
+              
+              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
                 
                 {/* Background aura */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
+                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
 
                 <div>
                   {/* Header Row */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="px-3 py-1 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-semibold">
-                      Desenvolvimento Estruturado
+                  <div className="flex items-center justify-between gap-1.5 mb-3">
+                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      Trimestral
                     </span>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                      <CalendarDays className="w-3.5 h-3.5 text-luxury-gold" /> 90 dias
+                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 90 dias
                     </span>
                   </div>
 
                   {/* Icon & Title */}
-                  <div className="flex items-start gap-3.5 mb-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Sparkles className="w-6 h-6" />
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                      <Sparkles className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
-                        Acompanhamento trimestral
+                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
+                        Trimestral
                       </h3>
-                      <p className="text-xs text-zinc-400 font-mono mt-0.5">
-                        12 atendimentos ao longo de 3 meses
+                      <p className="text-[10px] text-zinc-400 font-mono">
+                        12 atendimentos (3 meses)
                       </p>
                     </div>
                   </div>
 
                   {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-2xl p-4 sm:p-5 my-5 shadow-inner">
-                    <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários do Plano (12 Sessões)
+                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                      Honorários (12 Sessões)
                     </div>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-sm font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">960</span>
-                      <span className="text-sm font-serif text-luxury-gold-light">,00</span>
+                    <div className="flex items-baseline gap-0.5 mt-0.5">
+                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">960</span>
+                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
-                    <div className="mt-2.5 pt-2 border-t border-luxury-gold/15 flex items-center gap-1.5 text-xs text-luxury-gold-light font-sans font-medium">
-                      <CreditCard className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Possibilidade em 3 pagamentos de R$ 320,00</span>
+                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
+                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
+                      <span>Em 3x de R$ 320,00</span>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-zinc-300 font-light leading-relaxed mb-6">
-                    Indicado para quem deseja estruturar um acompanhamento com maior regularidade ao longo de três meses, favorecendo continuidade clínica, construção de objetivos terapêuticos e desenvolvimento gradual de recursos psicológicos.
+                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                    Indicado para estruturar acompanhamento de 3 meses, favorecendo metas clínicas e novos recursos psicológicos.
                   </p>
 
                   {/* Features List */}
-                  <ul className="space-y-2.5 mb-8 text-xs text-zinc-300 font-light border-t border-luxury-gold/10 pt-4">
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>12 atendimentos clínicos no período de 90 dias</span>
+                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>12 atendimentos clínicos em 90 dias</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Plano Clínico Integrativo com metas bem definidas</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Plano Clínico Integrativo estruturado</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Treinamento aprofundado de Habilidades Psicológicas</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Treinamento de Habilidades Psicológicas</span>
                     </li>
-                    <li className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-luxury-gold shrink-0" />
-                      <span>Emissão de recibos mensais para reembolso no convênio</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                      <span>Recibos mensais para reembolso</span>
                     </li>
                   </ul>
                 </div>
@@ -821,19 +724,19 @@ export default function ConditionsAndFees() {
                 <div>
                   <button
                     onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/59UayeX')}
-                    className={`w-full flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
                         : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
                     }`}
                   >
-                    {isAllChecked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                    <span>Formalizar acompanhamento trimestral</span>
-                    <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                    <span>Formalizar trimestral</span>
+                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
-                    <p className="text-[10px] text-zinc-500 text-center font-mono mt-2">
-                      Marque as confirmações acima para habilitar
+                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
+                      Marque as 4 confirmações acima
                     </p>
                   )}
                 </div>
@@ -841,22 +744,6 @@ export default function ConditionsAndFees() {
               </div>
             </div>
 
-          </div>
-
-          {/* Dots de Paginação Interativos */}
-          <div className="flex items-center justify-center gap-2.5 mt-8">
-            {[0, 1, 2, 3].map((index) => (
-              <button
-                key={index}
-                onClick={() => scrollToIndex(index)}
-                aria-label={`Ir para o plano ${index + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  activeCardIndex === index 
-                    ? 'w-8 bg-gradient-to-r from-luxury-gold to-luxury-gold-light shadow-md shadow-luxury-gold/30' 
-                    : 'w-2.5 bg-zinc-700 hover:bg-luxury-gold/40'
-                }`}
-              />
-            ))}
           </div>
 
         </section>
