@@ -12,16 +12,23 @@ import AppointmentPlanner from './components/AppointmentPlanner';
 import Faq from './components/Faq';
 import Footer from './components/Footer';
 import LandPage from './components/LandPage';
+import ConditionsAndFees from './components/ConditionsAndFees';
 
 export default function App() {
-  const [currentPath, setCurrentPath] = useState(() => {
+  const getPath = () => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      return hash === '#landpage' ? '/landpage' : path;
+      if (hash === '#landpage') return '/landpage';
+      if (hash === '#condicoes-de-atendimento' || hash === '#formalizacao-do-acompanhamento') {
+        return '/condicoes-de-atendimento';
+      }
+      return path;
     }
     return '/';
-  });
+  };
+
+  const [currentPath, setCurrentPath] = useState(getPath);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState('');
@@ -29,9 +36,7 @@ export default function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      setCurrentPath(hash === '#landpage' ? '/landpage' : path);
+      setCurrentPath(getPath());
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -48,6 +53,17 @@ export default function App() {
       window.removeEventListener('hashchange', handlePopState);
     };
   }, []);
+
+  if (
+    currentPath === '/condicoes-de-atendimento' || 
+    currentPath === '/condicoes-de-atendimento/' ||
+    currentPath.startsWith('/condicoes-de-atendimento') ||
+    currentPath === '/formalizacao-do-acompanhamento' ||
+    currentPath === '/formalizacao-do-acompanhamento/' ||
+    currentPath.startsWith('/formalizacao-do-acompanhamento')
+  ) {
+    return <ConditionsAndFees />;
+  }
 
   if (currentPath === '/landpage' || currentPath === '/landpage/' || currentPath.startsWith('/landpage')) {
     return <LandPage />;

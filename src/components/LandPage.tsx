@@ -17,16 +17,33 @@ import {
   ChevronDown,
   Receipt,
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  X,
+  FileText
 } from 'lucide-react';
 
 export default function LandPage() {
-  const whatsappUrl = "https://wa.me/5521975249514?text=" + encodeURIComponent(
-    "Olá, Bruno! Acessei sua página de atendimento e gostaria de agendar uma sessão de acolhimento psicológico com você."
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const whatsappDirectUrl = "https://wa.me/5521975249514?text=" + encodeURIComponent(
+    "Olá, Bruno! Acessei sua página de atendimento e gostaria de conversar para esclarecer algumas dúvidas antes de iniciar."
   );
 
-  const handleDirectWhatsApp = () => {
-    window.open(whatsappUrl, '_blank');
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleNavigateToConditions = () => {
+    setModalOpen(false);
+    // Atualiza a URL e dispara o evento para navegação SPA
+    window.history.pushState({}, '', '/condicoes-de-atendimento');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo(0, 0);
+  };
+
+  const handleOpenWhatsAppFromModal = () => {
+    window.open(whatsappDirectUrl, '_blank');
+    setModalOpen(false);
   };
 
   // State para o Mini-FAQ interativo
@@ -78,14 +95,14 @@ export default function LandPage() {
             </div>
           </div>
 
-          {/* Botão rápido com sutil pulso */}
+          {/* Botão rápido para abrir o modal ético */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleDirectWhatsApp}
+            onClick={handleOpenModal}
             className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-[11px] sm:text-xs uppercase tracking-wider px-5 py-2.5 rounded-full shadow-md hover:brightness-110 transition cursor-pointer"
           >
-            <span>Agendar Sessão</span>
+            <span>Iniciar Acompanhamento</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </motion.button>
         </div>
@@ -168,7 +185,7 @@ export default function LandPage() {
               Uma experiência acolhedora, científica e transformadora. Está pronto para começar?
             </motion.h3>
 
-            {/* Direct CTA Button com micro-animação pulsante */}
+            {/* Direct CTA Button que aciona o Modal de Orientação Ética */}
             <div className="relative group">
               <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-md group-hover:opacity-80 animate-pulse transition duration-1000" />
               <motion.button
@@ -176,11 +193,11 @@ export default function LandPage() {
                 transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleDirectWhatsApp}
+                onClick={handleOpenModal}
                 className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-8 sm:px-12 py-5 rounded-full shadow-2xl shadow-luxury-gold/25 transition duration-300 cursor-pointer"
               >
                 <MessageSquareHeart className="w-6 h-6 shrink-0" />
-                <span>Agendar meu Atendimento Online</span>
+                <span>Quero dar o primeiro passo</span>
               </motion.button>
             </div>
 
@@ -190,11 +207,11 @@ export default function LandPage() {
               <span>•</span>
               <span className="flex items-center gap-1.5"><Receipt className="w-4 h-4 text-luxury-gold" /> Recibo para Reembolso</span>
               <span>•</span>
-              <span className="flex items-center gap-1.5"><Smartphone className="w-4 h-4 text-luxury-gold" /> Resposta Rápida no WhatsApp</span>
+              <span className="flex items-center gap-1.5"><Smartphone className="w-4 h-4 text-luxury-gold" /> Atendimento Online</span>
             </div>
 
             <p className="text-xs sm:text-sm text-luxury-text-muted mt-4 max-w-lg leading-relaxed font-light">
-              Tudo pensado para a sua total comodidade, privacidade e segurança. Cuidado de excelência onde você estiver, sem precisar sair de casa.
+              A psicoterapia pode ajudar você a compreender seus padrões, organizar sua experiência emocional e desenvolver recursos psicológicos para lidar com a vida de forma mais consciente.
             </p>
 
           </div>
@@ -300,10 +317,10 @@ export default function LandPage() {
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={handleDirectWhatsApp}
+                  onClick={handleOpenModal}
                   className="flex items-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-full shadow-lg hover:brightness-110 transition cursor-pointer"
                 >
-                  <span>Quero Mudar Essa Realidade</span>
+                  <span>Quero olhar para isso com seriedade</span>
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </div>
@@ -371,7 +388,7 @@ export default function LandPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 5: FORMATO DA CONSULTA & AGENDAMENTO DIRETO */}
+        {/* SEÇÃO 5: FORMATO DA CONSULTA (FOCO EM MÉTODO E ÉTICA, SEM VALORES PÚBLICOS) */}
         <section className="py-24 bg-luxury-black px-6">
           <div className="max-w-2xl mx-auto">
             
@@ -409,10 +426,10 @@ export default function LandPage() {
               </ul>
 
               <p className="text-xs sm:text-sm text-luxury-gold-light font-medium tracking-wide my-4">
-                Dê o primeiro passo para desenvolver novas habilidades e viver com equilíbrio.
+                Comece a construir mais clareza, autonomia e direção sobre aquilo que você está vivendo.
               </p>
 
-              {/* Botão de Agendamento Direto com animação pulsante */}
+              {/* Botão para abrir o Modal de Orientação */}
               <div className="w-full relative group mt-4">
                 <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-sm group-hover:opacity-80 animate-pulse transition duration-1000" />
                 <motion.button
@@ -420,11 +437,11 @@ export default function LandPage() {
                   transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={handleDirectWhatsApp}
+                  onClick={handleOpenModal}
                   className="relative w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider py-4.5 rounded-full shadow-lg shadow-luxury-gold/15 transition cursor-pointer"
                 >
                   <MessageSquareHeart className="w-5 h-5 shrink-0" />
-                  <span>Agendar minha Sessão Agora</span>
+                  <span>Quero entender como funciona o atendimento</span>
                 </motion.button>
               </div>
 
@@ -525,7 +542,7 @@ export default function LandPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 8 (NOVA): QUEBRA RÁPIDA DE OBJEÇÕES / MINI-FAQ */}
+        {/* SEÇÃO 8: QUEBRA RÁPIDA DE OBJEÇÕES / MINI-FAQ */}
         <section className="py-24 bg-luxury-charcoal border-b border-luxury-gold/10 px-6">
           <div className="max-w-3xl mx-auto">
             
@@ -605,10 +622,10 @@ export default function LandPage() {
             </div>
 
             <p className="text-xs sm:text-sm text-luxury-text-muted mb-8 max-w-md font-light">
-              Clique no botão abaixo para agendar a sua sessão diretamente pelo WhatsApp com o psicólogo Bruno de Oliveira.
+              Dê o primeiro passo para um processo de mudança conduzido com método, responsabilidade e acompanhamento profissional.
             </p>
 
-            {/* Botão Final com Micro-Animação Pulsante */}
+            {/* Botão Final com Micro-Animação Pulsante que abre o Modal de Orientação */}
             <div className="relative group">
               <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-md group-hover:opacity-80 animate-pulse transition duration-1000" />
               <motion.button
@@ -616,11 +633,11 @@ export default function LandPage() {
                 transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleDirectWhatsApp}
+                onClick={handleOpenModal}
                 className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-10 py-5 rounded-full shadow-2xl shadow-luxury-gold/25 transition cursor-pointer"
               >
                 <MessageSquareHeart className="w-5 h-5 shrink-0" />
-                <span>Quero Iniciar meu Atendimento</span>
+                <span>Quero iniciar meu acompanhamento</span>
               </motion.button>
             </div>
 
@@ -630,7 +647,7 @@ export default function LandPage() {
                 Possui alguma dúvida específica sobre o formato das sessões ou horários disponíveis?
               </p>
               <a
-                href={whatsappUrl}
+                href={whatsappDirectUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold-light hover:text-white px-6 py-3 rounded-full text-xs font-semibold uppercase tracking-wider transition duration-300"
@@ -665,6 +682,89 @@ export default function LandPage() {
         </section>
 
       </main>
+
+      {/* MODAL DE ORIENTAÇÃO ÉTICA ANTES DE PROSSEGUIR */}
+      <AnimatePresence>
+        {modalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalOpen(false)}
+              className="absolute inset-0 bg-luxury-black/90 backdrop-blur-md"
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="relative bg-luxury-charcoal/95 border border-luxury-gold/30 p-7 sm:p-9 rounded-3xl max-w-lg w-full shadow-2xl z-10 text-left flex flex-col"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setModalOpen(false)}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-luxury-gold transition cursor-pointer p-1"
+                aria-label="Fechar modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header com Ícone */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-luxury-gold/10 border border-luxury-gold/30 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-luxury-gold" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-serif text-white font-semibold tracking-tight">
+                  Dar o primeiro passo com responsabilidade
+                </h3>
+              </div>
+
+              {/* Texto Explicativo Ético */}
+              <div className="text-xs sm:text-sm text-zinc-300 space-y-3 font-light leading-relaxed mb-6 max-h-[50vh] overflow-y-auto pr-1">
+                <p>
+                  Este pode ser um passo importante para olhar com mais seriedade para aquilo que você vem vivendo.
+                </p>
+                <p>
+                  A psicoterapia não oferece promessa automática de resultado, mas pode favorecer compreensão, elaboração emocional, identificação de padrões e desenvolvimento gradual de recursos psicológicos para lidar com a vida de forma mais consciente.
+                </p>
+                <p>
+                  Antes de iniciar o acompanhamento, você poderá conhecer as modalidades de organização do atendimento, os honorários profissionais e as condições gerais de contratação.
+                </p>
+                <p className="p-3 bg-luxury-black/40 rounded-xl border border-luxury-gold/15 text-[#dfcaa7] italic">
+                  Essas informações são apresentadas com finalidade de transparência, não como promoção, desconto, oferta comercial ou garantia de resultado.
+                </p>
+                <p>
+                  Você pode seguir para a página de modalidades ou falar diretamente pelo WhatsApp para esclarecer dúvidas antes de prosseguir.
+                </p>
+              </div>
+
+              {/* Botões do Modal */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-luxury-gold/15">
+                <button
+                  onClick={handleNavigateToConditions}
+                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition cursor-pointer"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Ver modalidades de acompanhamento</span>
+                </button>
+
+                <button
+                  onClick={handleOpenWhatsAppFromModal}
+                  className="flex items-center justify-center gap-2 border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold-light hover:text-white text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl transition cursor-pointer"
+                >
+                  <MessageSquareHeart className="w-4 h-4" />
+                  <span>Falar pelo WhatsApp</span>
+                </button>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
