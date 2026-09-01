@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Sparkles, 
   Shield, 
@@ -13,7 +13,11 @@ import {
   Award, 
   ArrowRight,
   HelpCircle,
-  Zap
+  Zap,
+  ChevronDown,
+  Receipt,
+  Smartphone,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function LandPage() {
@@ -24,6 +28,28 @@ export default function LandPage() {
   const handleDirectWhatsApp = () => {
     window.open(whatsappUrl, '_blank');
   };
+
+  // State para o Mini-FAQ interativo
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const faqItems = [
+    {
+      question: "Como funciona a consulta de psicologia online?",
+      answer: "A sessão acontece por videochamada individual em uma plataforma segura e com sigilo absoluto. Você recebe um link exclusivo diretamente no seu WhatsApp e pode entrar com apenas um clique pelo seu celular, computador ou tablet, sem precisar instalar programas complicados."
+    },
+    {
+      question: "Posso solicitar reembolso ao meu plano de saúde / convênio?",
+      answer: "Sim! Ao término de cada sessão ou mês, emitimos o recibo profissional oficial com registro no CRP 05/75885 para que você solicite o reembolso integral ou parcial diretamente junto ao seu plano de saúde."
+    },
+    {
+      question: "Nunca fiz terapia antes. Como será a nossa primeira conversa?",
+      answer: "O primeiro contato é um momento leve e acolhedor de 1. Acolhimento e 2. Análise da Queixa. Você não precisa preparar nada: criamos um espaço seguro e livre de julgamentos para ouvir sua história e traçar juntos um plano claro de evolução."
+    },
+    {
+      question: "O que significa 'Psicologia de 4ª Geração'?",
+      answer: "É uma abordagem moderna e ativa que vai além de apenas desabafar. Nós identificamos como a sua dor funciona no presente e realizamos um treinamento prático de habilidades psicológicas (como autocontrole, imunidade social e autoconhecimento) para gerar transformações reais e duradouras."
+    }
+  ];
 
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
@@ -52,13 +78,16 @@ export default function LandPage() {
             </div>
           </div>
 
-          <button
+          {/* Botão rápido com sutil pulso */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleDirectWhatsApp}
-            className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-[11px] sm:text-xs uppercase tracking-wider px-5 py-2.5 rounded-full shadow-md hover:brightness-110 active:scale-95 transition cursor-pointer"
+            className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-[11px] sm:text-xs uppercase tracking-wider px-5 py-2.5 rounded-full shadow-md hover:brightness-110 transition cursor-pointer"
           >
             <span>Agendar Sessão</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          </motion.button>
         </div>
       </header>
 
@@ -91,7 +120,7 @@ export default function LandPage() {
               Descubra a Origem da sua Dor e <span className="gold-gradient-text italic font-medium">Retome o Controle</span> da sua Vida.
             </motion.h1>
 
-            {/* Subtitle - Atualizado conforme solicitação */}
+            {/* Subtitle */}
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -129,7 +158,7 @@ export default function LandPage() {
               </div>
             </motion.div>
 
-            {/* Texto em linha única conforme solicitado */}
+            {/* Texto em linha única */}
             <motion.h3 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -139,19 +168,32 @@ export default function LandPage() {
               Uma experiência acolhedora, científica e transformadora. Está pronto para começar?
             </motion.h3>
 
-            {/* Direct CTA Button */}
-            <motion.button
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              onClick={handleDirectWhatsApp}
-              className="flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-8 sm:px-12 py-5 rounded-full shadow-xl shadow-luxury-gold/15 transition duration-300 cursor-pointer"
-            >
-              <MessageSquareHeart className="w-6 h-6 shrink-0" />
-              <span>Agendar meu Atendimento Online</span>
-            </motion.button>
+            {/* Direct CTA Button com micro-animação pulsante */}
+            <div className="relative group">
+              <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-md group-hover:opacity-80 animate-pulse transition duration-1000" />
+              <motion.button
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDirectWhatsApp}
+                className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-8 sm:px-12 py-5 rounded-full shadow-2xl shadow-luxury-gold/25 transition duration-300 cursor-pointer"
+              >
+                <MessageSquareHeart className="w-6 h-6 shrink-0" />
+                <span>Agendar meu Atendimento Online</span>
+              </motion.button>
+            </div>
 
-            <p className="text-xs sm:text-sm text-luxury-text-muted mt-6 max-w-lg leading-relaxed font-light">
+            {/* Microcopy de Reforço & Segurança */}
+            <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] sm:text-xs text-luxury-gold-light mt-4 font-medium">
+              <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-emerald-400" /> Sigilo Ético CFP</span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5"><Receipt className="w-4 h-4 text-luxury-gold" /> Recibo para Reembolso</span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5"><Smartphone className="w-4 h-4 text-luxury-gold" /> Resposta Rápida no WhatsApp</span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-luxury-text-muted mt-4 max-w-lg leading-relaxed font-light">
               Tudo pensado para a sua total comodidade, privacidade e segurança. Cuidado de excelência onde você estiver, sem precisar sair de casa.
             </p>
 
@@ -171,7 +213,6 @@ export default function LandPage() {
               Mais de <span className="gold-gradient-text italic font-medium">+4 mil horas</span> de acolhimento e dedicação clínica.
             </h2>
             
-            {/* Texto atualizado para neurociência clínica */}
             <p className="text-sm sm:text-base text-luxury-text-muted max-w-2xl mx-auto mb-12 font-light">
               Autoconhecimento, regulação emocional profunda e transformação através da TCC Integrativa de 4ª Geração, amparada pela neurociência clínica.
             </p>
@@ -256,13 +297,15 @@ export default function LandPage() {
               </div>
 
               <div className="mt-10 flex justify-center sm:justify-start">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={handleDirectWhatsApp}
-                  className="flex items-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-full shadow-lg hover:brightness-110 active:scale-95 transition cursor-pointer"
+                  className="flex items-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-full shadow-lg hover:brightness-110 transition cursor-pointer"
                 >
                   <span>Quero Mudar Essa Realidade</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </motion.button>
               </div>
 
             </div>
@@ -279,7 +322,6 @@ export default function LandPage() {
               <span className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-medium">Estrutura da Sessão</span>
             </div>
 
-            {/* 50 minutos atualizado */}
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-white tracking-tight mb-4">
               O que você terá em <span className="gold-gradient-text italic font-medium">50 minutos</span> de atendimento?
             </h2>
@@ -288,7 +330,7 @@ export default function LandPage() {
               Atendimento Individual, Prático e com Método Claro de Evolução
             </p>
 
-            {/* 1. Acolhimento | 2. Queixa | 3. Ativação (simplificado conforme documentos) */}
+            {/* 1. Acolhimento | 2. Queixa | 3. Ativação */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
               
               {/* Card 1: Acolhimento */}
@@ -370,18 +412,26 @@ export default function LandPage() {
                 Dê o primeiro passo para desenvolver novas habilidades e viver com equilíbrio.
               </p>
 
-              {/* Botão de Agendamento Direto */}
-              <button
-                onClick={handleDirectWhatsApp}
-                className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider py-4.5 rounded-full shadow-lg shadow-luxury-gold/15 transition cursor-pointer mt-4"
-              >
-                <MessageSquareHeart className="w-5 h-5 shrink-0" />
-                <span>Agendar minha Sessão Agora</span>
-              </button>
+              {/* Botão de Agendamento Direto com animação pulsante */}
+              <div className="w-full relative group mt-4">
+                <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-sm group-hover:opacity-80 animate-pulse transition duration-1000" />
+                <motion.button
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleDirectWhatsApp}
+                  className="relative w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider py-4.5 rounded-full shadow-lg shadow-luxury-gold/15 transition cursor-pointer"
+                >
+                  <MessageSquareHeart className="w-5 h-5 shrink-0" />
+                  <span>Agendar minha Sessão Agora</span>
+                </motion.button>
+              </div>
 
-              <span className="text-[11px] text-zinc-500 mt-3 font-mono">
-                Atendimento particular com recibo para reembolso
-              </span>
+              <div className="flex items-center justify-center gap-2 text-[11px] text-zinc-400 mt-4 font-mono">
+                <Receipt className="w-3.5 h-3.5 text-luxury-gold" />
+                <span>Atendimento particular com emissão de recibo para reembolso</span>
+              </div>
 
             </div>
 
@@ -475,7 +525,62 @@ export default function LandPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 8: FINALIZAÇÃO & SUPORTE */}
+        {/* SEÇÃO 8 (NOVA): QUEBRA RÁPIDA DE OBJEÇÕES / MINI-FAQ */}
+        <section className="py-24 bg-luxury-charcoal border-b border-luxury-gold/10 px-6">
+          <div className="max-w-3xl mx-auto">
+            
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <HelpCircle className="w-5 h-5 text-luxury-gold" />
+                <span className="text-xs font-sans tracking-[0.3em] uppercase text-luxury-gold-light font-medium">Dúvidas Frequentes</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white tracking-tight">
+                Tudo o que você precisa saber <span className="gold-gradient-text italic font-medium">antes de começar</span>
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {faqItems.map((item, index) => {
+                const isOpen = openFaq === index;
+                return (
+                  <div 
+                    key={index}
+                    className="bg-luxury-black/70 border border-luxury-gold/15 rounded-2xl overflow-hidden transition duration-300 hover:border-luxury-gold/35"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                      className="w-full p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
+                    >
+                      <span className="font-serif text-sm sm:text-base text-white font-medium">
+                        {item.question}
+                      </span>
+                      <ChevronDown 
+                        className={`w-5 h-5 text-luxury-gold shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="px-6 pb-6 pt-1 text-xs sm:text-sm text-luxury-text-muted leading-relaxed font-light border-t border-luxury-gold/10"
+                        >
+                          {item.answer}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </section>
+
+        {/* SEÇÃO 9: FINALIZAÇÃO & SUPORTE */}
         <section className="py-24 bg-gradient-to-b from-luxury-charcoal to-luxury-black px-6 text-center">
           <div className="max-w-3xl mx-auto flex flex-col items-center">
             
@@ -503,14 +608,21 @@ export default function LandPage() {
               Clique no botão abaixo para agendar a sua sessão diretamente pelo WhatsApp com o psicólogo Bruno de Oliveira.
             </p>
 
-            {/* Botão Final de Agendamento */}
-            <button
-              onClick={handleDirectWhatsApp}
-              className="flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-10 py-5 rounded-full shadow-2xl shadow-luxury-gold/20 transition cursor-pointer"
-            >
-              <MessageSquareHeart className="w-5 h-5 shrink-0" />
-              <span>Quero Iniciar meu Atendimento</span>
-            </button>
+            {/* Botão Final com Micro-Animação Pulsante */}
+            <div className="relative group">
+              <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-luxury-gold to-luxury-gold-light opacity-50 blur-md group-hover:opacity-80 animate-pulse transition duration-1000" />
+              <motion.button
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDirectWhatsApp}
+                className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-sm sm:text-base uppercase tracking-wider px-10 py-5 rounded-full shadow-2xl shadow-luxury-gold/25 transition cursor-pointer"
+              >
+                <MessageSquareHeart className="w-5 h-5 shrink-0" />
+                <span>Quero Iniciar meu Atendimento</span>
+              </motion.button>
+            </div>
 
             {/* Dúvidas / Suporte Direto */}
             <div className="mt-14 pt-10 border-t border-luxury-gold/15 w-full">
@@ -528,7 +640,7 @@ export default function LandPage() {
               </a>
             </div>
 
-            {/* Logo Marca no Rodapé */}
+            {/* Logo Marca */}
             <div className="mt-12 opacity-80">
               <div className="w-12 h-12 rounded-full border border-luxury-gold/30 flex items-center justify-center mx-auto bg-luxury-black p-1">
                 <img 
@@ -537,8 +649,15 @@ export default function LandPage() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <p className="text-[10px] text-zinc-500 font-mono mt-2 uppercase tracking-widest">
+              <p className="text-[10px] text-zinc-400 font-mono mt-2 uppercase tracking-widest">
                 Bruno de Oliveira Lima • CRP 05/75885 • Todos os direitos reservados
+              </p>
+            </div>
+
+            {/* AVISO DE CONFORMIDADE LEGAL / META ADS & GOOGLE ADS COMPLIANCE */}
+            <div className="mt-10 pt-6 border-t border-white/5 max-w-2xl text-[10px] text-zinc-400 leading-relaxed font-sans">
+              <p>
+                Este site não é afiliado à Meta Platforms, Inc., Facebook, Instagram, Google LLC ou a qualquer uma de suas entidades. Após sair de tais plataformas, a responsabilidade é exclusiva deste domínio. As informações e atendimentos prestados seguem rigorosamente o Código de Ética Profissional do Conselho Federal de Psicologia (CFP) e os critérios de atendimento online regularizados pelo e-Psi.
               </p>
             </div>
 
