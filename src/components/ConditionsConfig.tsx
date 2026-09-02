@@ -34,11 +34,17 @@ import {
   KeyRound,
   Mail,
   Globe,
-  Loader2
+  Loader2,
+  Plus,
+  Trash2,
+  CopyPlus,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { 
   PricingSettings, 
   DEFAULT_PRICING_SETTINGS,
+  DEFAULT_PLANS,
   fetchPricingSettingsFromCloud,
   savePricingSettingsToCloud,
   resetPricingSettingsInCloud,
@@ -100,8 +106,6 @@ export default function ConditionsConfig() {
     });
   }, []);
 
-  const planKeys: (keyof PricingSettings['plans'])[] = ['avulsa', 'mensal', 'bimestral', 'trimestral'];
-
   // Processar tentativa de login
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,125 +139,142 @@ export default function ConditionsConfig() {
   };
 
   // Verificar quais planos tiveram seus preços alterados em relação aos salvos
-  const modifiedPricePlans = planKeys.filter(
-    key => settings.plans[key].finalPrice !== initialSettings.plans[key].finalPrice
-  );
+  const modifiedPricePlans = settings.plans.filter((plan) => {
+    const orig = initialSettings.plans.find((p) => p.id === plan.id);
+    return orig && orig.finalPrice !== plan.finalPrice;
+  });
 
   const hasPriceModifications = modifiedPricePlans.length > 0;
 
-  // Atualizar preço base da sessão avulsa e recalcular valores caso solicitado
+  // Atualizar preço base da sessão avulsa
   const handleBasePriceChange = (newBasePrice: number) => {
-    setSettings(prev => {
-      const updatedPlans = { ...prev.plans };
-      updatedPlans.avulsa = {
-        ...updatedPlans.avulsa,
-        finalPrice: newBasePrice
-      };
-      return {
-        ...prev,
-        baseSessionPrice: newBasePrice,
-        plans: updatedPlans
-      };
-    });
+    setSettings(prev => ({
+      ...prev,
+      baseSessionPrice: newBasePrice,
+      plans: prev.plans.map(p => p.id === 'avulsa' ? { ...p, finalPrice: newBasePrice } : p)
+    }));
   };
 
-  // Recalcular plano quando o percentual de desconto for alterado
-  const handleDiscountPercentChange = (planKey: keyof PricingSettings['plans'], discountPercent: number) => {
-    setSettings(prev => {
-      const plan = prev.plans[planKey];
-      const nominalTotal = prev.baseSessionPrice * plan.sessionsCount;
-      const discountVal = (nominalTotal * discountPercent) / 100;
-      const finalPrice = Math.max(0, Math.round(nominalTotal - discountVal));
-      
-      let autoInstallmentText = plan.installmentText;
-      if (plan.installmentsCount > 1) {
-        const valParcel = (finalPrice / plan.installmentsCount).toFixed(2).replace('.', ',');
-        autoInstallmentText = `Em ${plan.installmentsCount}x de R$ ${valParcel}`;
-      }
-
-      return {
-        ...prev,
-        plans: {
-          ...prev.plans,
-          [planKey]: {
-            ...plan,
-            discountPercent: Number(discountPercent.toFixed(2)),
-            finalPrice,
-            installmentText: autoInstallmentText
-          }
+  // Alternar Ativação / Inativação de um plano
+  const handleTogglePlanActive = (planId: string) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          return { ...p, active: !p.active };
         }
-      };
-    });
+        return p;
+      })
+    }));
   };
 
-  // Recalcular percentual de desconto quando o preço final for alterado manualmente
-  const handleFinalPriceChange = (planKey: keyof PricingSettings['plans'], finalPrice: number) => {
-    setSettings(prev => {
-      const plan = prev.plans[planKey];
-      const nominalTotal = prev.baseSessionPrice * plan.sessionsCount;
-      let discountPercent = 0;
-      if (nominalTotal > 0 && finalPrice < nominalTotal) {
-        discountPercent = ((nominalTotal - finalPrice) / nominalTotal) * 100;
-      }
+  // Adicionar Novo Plano Customizado
+  const handleAddNewPlan = () => {
+    const customCount = settings.plans.filter(p => p.isCustom).length;
+    if (customCount >= 2) {
+      alert('Você já possui 2 planos customizados adicionados. Edite ou exclua um deles para adicionar outro.');
+      return;
+    }
 
-      let autoInstallmentText = plan.installmentText;
-      if (plan.installmentsCount > 1) {
-        const valParcel = (finalPrice / plan.installmentsCount).toFixed(2).replace('.', ',');
-        autoInstallmentText = `Em ${plan.installmentsCount}x de R$ ${valParcel}`;
-      }
+    const newId = `custom_p${customCount === 0 ? '4' : '5'}`;
+    const newPlan: PlanConfig = {
+      id: newId,
+      title: customCount === 0 ? 'Acompanhamento Semestral' : 'Plano Intensivo',
+      badge: 'Personalizado',
+      sessionsCount: customCount === 0 ? 24 : 6,
+      periodDays: customCount === 0 ? 180 : 45,
+      periodLabel: customCount === 0 ? '180 dias' : '45 dias',
+      discountPercent: 30,
+      finalPrice: customCount === 0 ? 1800 : 500,
+      installmentsCount: customCount === 0 ? 6 : 2,
+      installmentText: customCount === 0 ? 'Em 6x de R$ 300,00' : 'Em 2x de R$ 250,00',
+      paymentLink: 'https://pay.kiwify.com.br/',
+      description: 'Modalidade estruturada de acompanhamento clínico com suporte continuado.',
+      features: [
+        'Atendimentos clínicos dedicados',
+        'Plano de intervenção estruturado',
+        'Emissão de recibos mensais para reembolso',
+        'Suporte direto via WhatsApp'
+      ],
+      active: true,
+      isCustom: true
+    };
 
-      return {
-        ...prev,
-        plans: {
-          ...prev.plans,
-          [planKey]: {
-            ...plan,
-            finalPrice,
-            discountPercent: Number(discountPercent.toFixed(2)),
-            installmentText: autoInstallmentText
-          }
-        }
-      };
-    });
+    setSettings(prev => ({
+      ...prev,
+      plans: [...prev.plans, newPlan]
+    }));
   };
 
-  // Atualizar número de parcelas
-  const handleInstallmentsCountChange = (planKey: keyof PricingSettings['plans'], installmentsCount: number) => {
-    setSettings(prev => {
-      const plan = prev.plans[planKey];
-      let autoInstallmentText = plan.installmentText;
-      if (installmentsCount > 1) {
-        const valParcel = (plan.finalPrice / installmentsCount).toFixed(2).replace('.', ',');
-        autoInstallmentText = `Em ${installmentsCount}x de R$ ${valParcel}`;
-      } else {
-        autoInstallmentText = 'Pagamento único por sessão';
-      }
+  // Duplicar um plano existente
+  const handleDuplicatePlan = (plan: PlanConfig) => {
+    const customCount = settings.plans.filter(p => p.isCustom).length;
+    if (customCount >= 2) {
+      alert('Limite máximo de planos extras atingido (2 planos customizados). Exclua um plano extra antes de duplicar.');
+      return;
+    }
 
-      return {
-        ...prev,
-        plans: {
-          ...prev.plans,
-          [planKey]: {
-            ...plan,
-            installmentsCount,
-            installmentText: autoInstallmentText
-          }
-        }
-      };
-    });
+    const newId = `custom_p${customCount === 0 ? '4' : '5'}`;
+    const duplicatedPlan: PlanConfig = {
+      ...plan,
+      id: newId,
+      title: `${plan.title} (Cópia)`,
+      badge: plan.badge || 'Cópia',
+      isCustom: true,
+      active: true
+    };
+
+    setSettings(prev => ({
+      ...prev,
+      plans: [...prev.plans, duplicatedPlan]
+    }));
+  };
+
+  // Excluir um plano
+  const handleDeletePlan = (planId: string) => {
+    const targetPlan = settings.plans.find(p => p.id === planId);
+    if (!targetPlan) return;
+
+    if (targetPlan.isCustom) {
+      if (window.confirm(`Deseja realmente excluir o plano "${targetPlan.title}"?`)) {
+        setSettings(prev => ({
+          ...prev,
+          plans: prev.plans.filter(p => p.id !== planId)
+        }));
+      }
+    } else {
+      // Plano base: inativa e pergunta se deseja ocultar
+      if (window.confirm(`Este é um dos 4 planos padrão. Deseja inativá-lo para que não apareça no site?`)) {
+        setSettings(prev => ({
+          ...prev,
+          plans: prev.plans.map(p => p.id === planId ? { ...p, active: false } : p)
+        }));
+      }
+    }
   };
 
   // Atualizar campo genérico de um plano
-  const handlePlanFieldChange = (planKey: keyof PricingSettings['plans'], field: keyof PlanConfig, value: any) => {
+  const handlePlanFieldChange = (planId: string, field: keyof PlanConfig, value: any) => {
     setSettings(prev => ({
       ...prev,
-      plans: {
-        ...prev.plans,
-        [planKey]: {
-          ...prev.plans[planKey],
-          [field]: value
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const updated = { ...p, [field]: value };
+          // Atualizar cálculo de parcelas se o preço final ou parcelas mudarem
+          if (field === 'finalPrice' || field === 'installmentsCount') {
+            const price = field === 'finalPrice' ? Number(value) : p.finalPrice;
+            const instCount = field === 'installmentsCount' ? Number(value) : p.installmentsCount;
+            if (instCount > 1) {
+              const valParcel = (price / instCount).toFixed(2).replace('.', ',');
+              updated.installmentText = `Em ${instCount}x de R$ ${valParcel}`;
+            } else {
+              updated.installmentText = 'Pagamento único por sessão';
+            }
+          }
+          return updated;
         }
-      }
+        return p;
+      })
     }));
   };
 
@@ -264,7 +285,7 @@ export default function ConditionsConfig() {
     setTimeout(() => setCopiedLinkKey(null), 2500);
   };
 
-  // Disparar fluxo de salvar (se houver alteração de preço, exibe o alerta explicativo primeiro)
+  // Disparar fluxo de salvar
   const handleSaveClick = () => {
     if (hasPriceModifications && !acknowledgedCheckoutSync) {
       setShowCheckoutWarningModal(true);
@@ -291,7 +312,7 @@ export default function ConditionsConfig() {
 
   // Resetar para os padrões na nuvem
   const handleReset = async () => {
-    if (window.confirm('Deseja realmente restaurar todos os preços e links de contratação na nuvem para os valores originais?')) {
+    if (window.confirm('Deseja realmente restaurar todos os planos originais e links de contratação na nuvem?')) {
       setIsSavingCloud(true);
       const restored = await resetPricingSettingsInCloud();
       setSettings(restored);
@@ -308,7 +329,7 @@ export default function ConditionsConfig() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `honorarios_psicologia_cloud_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `honorarios_psicologia_backup_${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -476,20 +497,30 @@ export default function ConditionsConfig() {
               </div>
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
-                  <span>Configurações de Planos & Checkout</span>
+                  <span>Gestão de Planos & Checkout</span>
                   <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30 flex items-center gap-1">
                     <Globe className="w-3 h-3" />
-                    <span>Nuvem Ativa</span>
+                    <span>Nuvem Global</span>
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  Sincronização global automática • Logado: olivenbaunvonbrun@gmaill.com
+                  {settings.plans.filter(p => p.active).length} planos ativos no site • {settings.plans.length} cadastrados
                 </p>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleAddNewPlan}
+              disabled={settings.plans.filter(p => p.isCustom).length >= 2}
+              className="flex items-center gap-1.5 bg-luxury-gold/15 hover:bg-luxury-gold/25 text-luxury-gold hover:text-white border border-luxury-gold/40 text-xs px-3.5 py-2 rounded-xl transition cursor-pointer"
+              title="Adicionar novo plano customizado"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Adicionar Plano</span>
+            </button>
+
             <button
               onClick={handleReset}
               disabled={isSavingCloud}
@@ -517,7 +548,7 @@ export default function ConditionsConfig() {
               {isSavingCloud ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Salvando na Nuvem...</span>
+                  <span>Salvando...</span>
                 </>
               ) : (
                 <>
@@ -552,7 +583,7 @@ export default function ConditionsConfig() {
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="text-xs">
               <p className="font-semibold text-white">Configurações Salvas na Nuvem!</p>
-              <p className="text-emerald-300/80">Qualquer pessoa que acessar o link da página de planos já verá os novos valores e links imediatamente.</p>
+              <p className="text-emerald-300/80">A página de planos foi atualizada instantaneamente para todos os visitantes.</p>
             </div>
           </motion.div>
         )}
@@ -574,7 +605,7 @@ export default function ConditionsConfig() {
               initial={{ opacity: 0, scale: 0.92, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#14120f] to-[#0a0b0f] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
+              className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#101218] to-[#0a0b0f] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
             >
               {/* Top Accent Line */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-luxury-gold to-amber-600" />
@@ -592,25 +623,25 @@ export default function ConditionsConfig() {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
-                    Lembrete Importante de Sincronização
+                    Lembrete de Sincronização Kiwify
                   </h3>
                   <p className="text-xs sm:text-sm text-amber-300/90 mt-1">
-                    Você modificou valores no site. Lembre-se de atualizar também na sua plataforma de pagamento (Kiwify)!
+                    Você modificou valores no site. Lembre-se de atualizar também na sua plataforma de checkout!
                   </p>
                 </div>
               </div>
 
               <div className="bg-black/60 border border-amber-500/30 rounded-2xl p-4 sm:p-5 mb-6 space-y-3 text-xs sm:text-sm text-zinc-200">
                 <p className="text-zinc-300 font-light">
-                  Para evitar que o paciente veja um valor na página e encontre outro valor diferente ao clicar no botão de contratação, confirme se os valores nos links de checkout abaixo foram ajustados:
+                  Para evitar inconsistências para o paciente, confirme se os valores nos links de checkout abaixo coincidem:
                 </p>
 
                 <div className="space-y-2.5 pt-2">
-                  {modifiedPricePlans.map((key) => {
-                    const plan = settings.plans[key];
-                    const oldPrice = initialSettings.plans[key].finalPrice;
+                  {modifiedPricePlans.map((plan) => {
+                    const orig = initialSettings.plans.find(p => p.id === plan.id);
+                    const oldPrice = orig ? orig.finalPrice : 0;
                     return (
-                      <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#1c1912] border border-amber-500/20 text-xs">
+                      <div key={plan.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#1c1912] border border-amber-500/20 text-xs">
                         <div>
                           <span className="font-semibold text-white font-serif">{plan.title}</span>
                           <span className="text-[11px] text-zinc-400 ml-2 font-mono">
@@ -647,7 +678,7 @@ export default function ConditionsConfig() {
                   )}
                 </div>
                 <span className="leading-snug">
-                  Estou ciente e irei garantir que os valores e ofertas cadastrados na <strong className="text-amber-300 font-semibold">plataforma de checkout (Kiwify)</strong> coincidam exatamente com os do site.
+                  Estou ciente e irei garantir que os valores na <strong className="text-amber-300 font-semibold">Kiwify</strong> coincidam exatamente com os do site.
                 </span>
               </label>
 
@@ -708,6 +739,7 @@ export default function ConditionsConfig() {
 
             <button
               onClick={handleSaveClick}
+              disabled={isSavingCloud}
               className="px-4 py-2 rounded-xl bg-amber-500 text-black font-semibold text-xs uppercase tracking-wider hover:brightness-110 transition shrink-0 cursor-pointer"
             >
               Salvar e sincronizar
@@ -728,7 +760,7 @@ export default function ConditionsConfig() {
                 Honorário Base por Sessão Avulsa
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 font-light mt-1 leading-relaxed">
-                Este é o valor de referência (1 atendimento de 50 min). Todos os descontos nominais e economias progressivas dos planos mensais, bimestrais e trimestrais são calculados automaticamente a partir desta base.
+                Valor de referência por atendimento individual. As parcelas e valores são recalculados automaticamente com base nos valores definidos nos cards abaixo.
               </p>
             </div>
 
@@ -755,87 +787,142 @@ export default function ConditionsConfig() {
           </div>
         </section>
 
-        {/* EDITOR DOS 4 PLANOS (CARDS DE CONFIGURAÇÃO) */}
+        {/* EDITOR DOS PLANOS (CARDS DE CONFIGURAÇÃO) */}
         <section className="mb-14">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-serif text-white font-semibold">
-                Planos de Acompanhamento & Links de Contratação
+                Gestão de Planos ({settings.plans.length} cadastrados)
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Altere valores, descontos percentuais e os links dos botões de contratação de cada plano.
+                Ative, inative, adicione, duplique ou exclua planos conforme sua conveniência clínica.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 bg-luxury-charcoal/60 p-1.5 rounded-xl border border-luxury-gold/20 text-xs">
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setActiveTab('editor')}
-                className={`px-4 py-2 rounded-lg transition font-medium cursor-pointer ${
-                  activeTab === 'editor' ? 'bg-luxury-gold text-luxury-black font-semibold' : 'text-zinc-400 hover:text-white'
-                }`}
+                onClick={handleAddNewPlan}
+                disabled={settings.plans.filter(p => p.isCustom).length >= 2}
+                className="flex items-center gap-1.5 bg-luxury-gold/20 hover:bg-luxury-gold/30 text-luxury-gold-light hover:text-white border border-luxury-gold/40 text-xs px-3.5 py-2 rounded-xl transition cursor-pointer"
               >
-                Modo Editor
+                <Plus className="w-4 h-4" />
+                <span>+ Adicionar Plano</span>
               </button>
-              <button
-                onClick={() => setActiveTab('preview')}
-                className={`px-4 py-2 rounded-lg transition font-medium cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'preview' ? 'bg-luxury-gold text-luxury-black font-semibold' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Simulador Visual</span>
-              </button>
+
+              <div className="flex items-center gap-1 bg-luxury-charcoal/60 p-1.5 rounded-xl border border-luxury-gold/20 text-xs">
+                <button
+                  onClick={() => setActiveTab('editor')}
+                  className={`px-3.5 py-1.5 rounded-lg transition font-medium cursor-pointer ${
+                    activeTab === 'editor' ? 'bg-luxury-gold text-luxury-black font-semibold' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  Editor
+                </button>
+                <button
+                  onClick={() => setActiveTab('preview')}
+                  className={`px-3.5 py-1.5 rounded-lg transition font-medium cursor-pointer flex items-center gap-1.5 ${
+                    activeTab === 'preview' ? 'bg-luxury-gold text-luxury-black font-semibold' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Prévia ({settings.plans.filter(p => p.active).length} no site)</span>
+                </button>
+              </div>
             </div>
           </div>
 
           {activeTab === 'editor' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {planKeys.map((key) => {
-                const plan = settings.plans[key];
-                const isPriceEdited = plan.finalPrice !== initialSettings.plans[key].finalPrice;
-                const nominalTotal = settings.baseSessionPrice * plan.sessionsCount;
-                const savingsNominal = Math.max(0, nominalTotal - plan.finalPrice);
-                const pricePerSession = plan.sessionsCount > 0 ? (plan.finalPrice / plan.sessionsCount).toFixed(2).replace('.', ',') : '0,00';
+              {settings.plans.map((plan, index) => {
+                const orig = initialSettings.plans.find(p => p.id === plan.id);
+                const isPriceEdited = orig && orig.finalPrice !== plan.finalPrice;
 
                 return (
                   <div 
-                    key={key}
+                    key={plan.id}
                     className={`bg-gradient-to-b from-luxury-charcoal/90 to-luxury-black border rounded-3xl p-6 sm:p-7 shadow-xl flex flex-col justify-between transition-all duration-300 ${
-                      isPriceEdited ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-luxury-gold/25'
+                      !plan.active 
+                        ? 'opacity-60 border-zinc-700/50 bg-black/40' 
+                        : isPriceEdited 
+                          ? 'border-amber-500/50 ring-1 ring-amber-500/20' 
+                          : 'border-luxury-gold/25'
                     }`}
                   >
                     <div>
-                      {/* Top Header */}
-                      <div className="flex items-center justify-between border-b border-luxury-gold/15 pb-4 mb-5">
+                      {/* Top Header com Status Ativo/Inativo e Botões de Ação */}
+                      <div className="flex items-center justify-between border-b border-luxury-gold/15 pb-4 mb-5 flex-wrap gap-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-luxury-gold/10 border border-luxury-gold/30 flex items-center justify-center text-luxury-gold font-serif font-bold text-sm">
-                            {plan.sessionsCount}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-serif text-lg text-white font-semibold capitalize">
-                                {plan.title}
-                              </h3>
-                              {isPriceEdited && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-mono uppercase font-bold animate-pulse">
-                                  Valor Editado
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-luxury-gold-light font-mono">
-                              {plan.sessionsCount === 1 ? '1 atendimento avulso' : `${plan.sessionsCount} atendimentos`}
+                          <button
+                            onClick={() => handleTogglePlanActive(plan.id)}
+                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold px-3 py-1 rounded-full border transition cursor-pointer ${
+                              plan.active 
+                                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25' 
+                                : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:bg-zinc-700'
+                            }`}
+                            title="Clique para ativar ou inativar este plano"
+                          >
+                            <span className={`w-2 h-2 rounded-full ${plan.active ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                            <span>{plan.active ? 'Ativo no Site' : 'Inativo (Oculto)'}</span>
+                          </button>
+
+                          {plan.isCustom && (
+                            <span className="text-[10px] bg-purple-500/20 border border-purple-500/30 text-purple-300 font-mono px-2 py-0.5 rounded-md">
+                              Personalizado
                             </span>
-                          </div>
+                          )}
+
+                          {isPriceEdited && (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-mono uppercase font-bold animate-pulse">
+                              Preço Alterado
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        {/* Botões de Duplicar e Excluir */}
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleDuplicatePlan(plan)}
+                            className="p-1.5 text-zinc-400 hover:text-luxury-gold bg-black/40 hover:bg-black/80 rounded-lg border border-white/5 transition cursor-pointer"
+                            title="Duplicar este plano"
+                          >
+                            <CopyPlus className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeletePlan(plan.id)}
+                            className="p-1.5 text-zinc-400 hover:text-red-400 bg-black/40 hover:bg-red-950/40 rounded-lg border border-white/5 hover:border-red-500/30 transition cursor-pointer"
+                            title={plan.isCustom ? "Excluir plano definitivamente" : "Inativar plano"}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Título e Badge */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                            Título do Plano
+                          </label>
+                          <input
+                            type="text"
+                            value={plan.title}
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'title', e.target.value)}
+                            className="w-full bg-black/60 border border-luxury-gold/30 text-white font-serif text-base font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            placeholder="Nome da modalidade"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                            Badge Superior
+                          </label>
                           <input
                             type="text"
                             value={plan.badge}
-                            onChange={(e) => handlePlanFieldChange(key, 'badge', e.target.value)}
-                            placeholder="Badge"
-                            className="bg-black/50 border border-luxury-gold/30 text-luxury-gold-light text-[11px] font-mono px-2.5 py-1 rounded-full w-24 text-center focus:outline-none focus:border-luxury-gold"
-                            title="Texto do Badge superior"
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'badge', e.target.value)}
+                            placeholder="Ex: Semanal"
+                            className="w-full bg-black/60 border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2 text-center focus:outline-none focus:border-luxury-gold"
                           />
                         </div>
                       </div>
@@ -846,7 +933,7 @@ export default function ConditionsConfig() {
                         {/* Preço Final */}
                         <div>
                           <label className="text-[10px] uppercase font-mono text-zinc-400 block mb-1">
-                            Preço Final do Plano (R$)
+                            Honorários do Plano (R$)
                           </label>
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-serif text-luxury-gold-light">R$</span>
@@ -855,51 +942,44 @@ export default function ConditionsConfig() {
                               min="0"
                               step="1"
                               value={plan.finalPrice}
-                              onChange={(e) => handleFinalPriceChange(key, Number(e.target.value) || 0)}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'finalPrice', Number(e.target.value) || 0)}
                               className="w-full bg-luxury-charcoal border border-luxury-gold/40 text-white font-serif text-xl font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-luxury-gold"
                             />
                             <span className="text-xs text-zinc-400 font-mono">,00</span>
                           </div>
                         </div>
 
-                        {/* Desconto em % (apenas para planos de 2+ sessões) */}
+                        {/* Parcelas */}
                         <div>
                           <label className="text-[10px] uppercase font-mono text-zinc-400 block mb-1">
-                            Desconto Aplicado (%)
+                            Parcelamento
                           </label>
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.1"
-                              disabled={plan.sessionsCount === 1}
-                              value={plan.discountPercent}
-                              onChange={(e) => handleDiscountPercentChange(key, Number(e.target.value) || 0)}
-                              className={`w-full bg-luxury-charcoal border text-white font-mono text-base font-semibold rounded-xl px-3 py-1.5 focus:outline-none ${
-                                plan.sessionsCount === 1 
-                                  ? 'border-white/10 text-zinc-500 cursor-not-allowed' 
-                                  : 'border-luxury-gold/40 focus:border-luxury-gold'
-                              }`}
-                            />
-                            <span className="text-xs text-luxury-gold font-mono">%</span>
-                          </div>
+                          <select
+                            value={plan.installmentsCount}
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'installmentsCount', Number(e.target.value))}
+                            className="w-full bg-luxury-charcoal border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-2.5 py-2.5 focus:outline-none focus:border-luxury-gold cursor-pointer"
+                          >
+                            <option value="1">1x (À vista)</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                            <option value="6">6x</option>
+                            <option value="12">12x</option>
+                          </select>
                         </div>
 
-                        {/* Métricas Automáticas */}
-                        <div className="sm:col-span-2 pt-2 border-t border-white/5 grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-black/30 p-2 rounded-xl">
-                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Valor Integral</span>
-                            <span className="text-xs font-mono text-zinc-300">R$ {nominalTotal},00</span>
-                          </div>
-                          <div className="bg-black/30 p-2 rounded-xl">
-                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Economia Paciente</span>
-                            <span className="text-xs font-mono text-emerald-400">R$ {savingsNominal},00</span>
-                          </div>
-                          <div className="bg-black/30 p-2 rounded-xl">
-                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Média p/ Sessão</span>
-                            <span className="text-xs font-mono text-luxury-gold-light">R$ {pricePerSession}</span>
-                          </div>
+                        {/* Texto de Parcelamento Exibido */}
+                        <div className="sm:col-span-2 pt-2 border-t border-white/5">
+                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                            Texto de Parcelamento (Card)
+                          </label>
+                          <input
+                            type="text"
+                            value={plan.installmentText}
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'installmentText', e.target.value)}
+                            className="w-full bg-luxury-charcoal border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            placeholder="Ex: Em 2x de R$ 210,00"
+                          />
                         </div>
 
                       </div>
@@ -909,17 +989,17 @@ export default function ConditionsConfig() {
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-xs font-serif font-semibold text-luxury-gold-light flex items-center gap-1.5">
                             <LinkIcon className="w-3.5 h-3.5 text-luxury-gold" />
-                            <span>Link de Contratação / Checkout</span>
+                            <span>Link de Checkout (Kiwify)</span>
                           </label>
 
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleCopyLink(key, plan.paymentLink)}
+                              onClick={() => handleCopyLink(plan.id, plan.paymentLink)}
                               className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 cursor-pointer"
                               title="Copiar URL"
                             >
                               <Copy className="w-2.5 h-2.5" />
-                              <span>{copiedLinkKey === key ? 'Copiado!' : 'Copiar'}</span>
+                              <span>{copiedLinkKey === plan.id ? 'Copiado!' : 'Copiar'}</span>
                             </button>
 
                             <a 
@@ -928,7 +1008,7 @@ export default function ConditionsConfig() {
                               rel="noreferrer"
                               className="text-luxury-gold hover:text-white flex items-center gap-1 text-[10px] bg-luxury-gold/10 hover:bg-luxury-gold/20 px-2.5 py-0.5 rounded-md border border-luxury-gold/30 transition"
                             >
-                              <span>Testar Checkout</span>
+                              <span>Testar</span>
                               <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           </div>
@@ -937,64 +1017,23 @@ export default function ConditionsConfig() {
                         <input
                           type="url"
                           value={plan.paymentLink}
-                          onChange={(e) => handlePlanFieldChange(key, 'paymentLink', e.target.value)}
+                          onChange={(e) => handlePlanFieldChange(plan.id, 'paymentLink', e.target.value)}
                           className="w-full bg-luxury-black border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-luxury-gold"
                           placeholder="https://pay.kiwify.com.br/..."
                         />
-                        <p className="text-[10px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1">
-                          <Info className="w-3 h-3 text-luxury-gold shrink-0" />
-                          <span>Ao clicar no botão deste plano, o paciente é direcionado para esta URL.</span>
-                        </p>
                       </div>
 
-                      {/* Configuração de Parcelamento */}
-                      <div className="space-y-3 mb-5">
-                        <div className="grid grid-cols-3 gap-3">
-                          <div>
-                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                              Parcelas
-                            </label>
-                            <select
-                              value={plan.installmentsCount}
-                              onChange={(e) => handleInstallmentsCountChange(key, Number(e.target.value))}
-                              className="w-full bg-luxury-black border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-2.5 py-2 focus:outline-none focus:border-luxury-gold cursor-pointer"
-                            >
-                              <option value="1">1x (À vista)</option>
-                              <option value="2">2x</option>
-                              <option value="3">3x</option>
-                              <option value="4">4x</option>
-                              <option value="6">6x</option>
-                              <option value="12">12x</option>
-                            </select>
-                          </div>
-
-                          <div className="col-span-2">
-                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                              Texto Exibido no Card
-                            </label>
-                            <input
-                              type="text"
-                              value={plan.installmentText}
-                              onChange={(e) => handlePlanFieldChange(key, 'installmentText', e.target.value)}
-                              className="w-full bg-luxury-black border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
-                              placeholder="Ex: Em 2x de R$ 210,00"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Descrição Curta */}
-                        <div>
-                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                            Descrição Clínica Curta
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={plan.description}
-                            onChange={(e) => handlePlanFieldChange(key, 'description', e.target.value)}
-                            className="w-full bg-luxury-black border border-luxury-gold/30 text-zinc-300 text-xs font-light rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold resize-none"
-                          />
-                        </div>
-
+                      {/* Descrição */}
+                      <div>
+                        <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                          Descrição Curta
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={plan.description}
+                          onChange={(e) => handlePlanFieldChange(plan.id, 'description', e.target.value)}
+                          className="w-full bg-luxury-black border border-luxury-gold/30 text-zinc-300 text-xs font-light rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold resize-none"
+                        />
                       </div>
 
                     </div>
@@ -1003,17 +1042,16 @@ export default function ConditionsConfig() {
               })}
             </div>
           ) : (
-            /* SIMULADOR VISUAL REAL DOS 4 CARDS */
+            /* SIMULADOR VISUAL REAL DOS PLANOS ATIVOS */
             <div className="bg-luxury-black/60 p-6 rounded-3xl border border-luxury-gold/30">
               <p className="text-xs text-luxury-gold-light font-mono mb-6 text-center">
-                Visualização em tempo real de como os 4 cards e botões aparecerão para os pacientes:
+                Visualização de como a página pública exibirá apenas os planos ativos ({settings.plans.filter(p => p.active).length} visíveis):
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 items-stretch">
-                {planKeys.map((key) => {
-                  const plan = settings.plans[key];
+                {settings.plans.filter(p => p.active).map((plan) => {
                   return (
-                    <div key={key} className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 flex flex-col h-full">
+                    <div key={plan.id} className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 flex flex-col h-full">
                       <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 flex flex-col justify-between overflow-hidden">
                         <div>
                           <div className="flex items-center justify-between gap-1.5 mb-3">
@@ -1021,16 +1059,13 @@ export default function ConditionsConfig() {
                               {plan.badge}
                             </span>
                             <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                              <Clock className="w-3 h-3 text-luxury-gold" /> {plan.periodLabel}
+                              <Clock className="w-3 h-3 text-luxury-gold" /> {plan.periodLabel || '50 min'}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-2.5 mb-2.5">
                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0">
-                              {key === 'avulsa' && <User className="w-4 h-4" />}
-                              {key === 'mensal' && <Calendar className="w-4 h-4" />}
-                              {key === 'bimestral' && <Layers className="w-4 h-4" />}
-                              {key === 'trimestral' && <Sparkles className="w-4 h-4" />}
+                              <Sparkles className="w-4 h-4" />
                             </div>
                             <div>
                               <h3 className="text-lg font-serif text-white font-semibold leading-tight">
@@ -1090,7 +1125,7 @@ export default function ConditionsConfig() {
 
         </section>
 
-        {/* BOTÃO FIXO/FLUTUANTE NO RODAPÉ PARA SALVAR */}
+        {/* BOTÃO FIXO NO RODAPÉ PARA SALVAR */}
         <div className="sticky bottom-6 z-40 max-w-2xl mx-auto bg-luxury-charcoal/95 border border-luxury-gold/40 p-4 sm:p-5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4">
           <div className="text-xs text-zinc-300">
             <span className="font-semibold text-white flex items-center gap-1.5">
@@ -1101,7 +1136,7 @@ export default function ConditionsConfig() {
                 </span>
               )}
             </span>
-            <p className="text-[10px] text-zinc-400 font-mono">As alterações valem imediatamente para qualquer pessoa que acessar a página de planos.</p>
+            <p className="text-[10px] text-zinc-400 font-mono">Planos inativos serão imediatamente ocultados do público.</p>
           </div>
 
           <button

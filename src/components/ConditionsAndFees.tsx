@@ -24,7 +24,8 @@ import {
 import { 
   fetchPricingSettingsFromCloud, 
   DEFAULT_PRICING_SETTINGS, 
-  PricingSettings 
+  PricingSettings,
+  PlanConfig
 } from '../utils/pricingConfig';
 
 export default function ConditionsAndFees() {
@@ -95,7 +96,6 @@ export default function ConditionsAndFees() {
   const handleFormalizationClick = (paymentUrl: string) => {
     if (!isAllChecked) {
       setShowValidationAlert(true);
-      // Rolar suavemente até a seção de ciência
       const el = document.getElementById('declaracao-de-ciencia');
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -109,7 +109,8 @@ export default function ConditionsAndFees() {
     "Olá, Bruno! Acessei a página de condições e honorários e gostaria de tirar algumas dúvidas sobre as modalidades de acompanhamento."
   );
 
-  const plans = pricingSettings.plans;
+  // Filtrar apenas os planos ATIVOS para exibição pública
+  const activePlans = pricingSettings.plans.filter(p => p.active);
 
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
@@ -358,7 +359,7 @@ export default function ConditionsAndFees() {
           </div>
         </section>
 
-        {/* SEÇÃO 2: OS 4 CARDS HORIZONTALMENTE NA PÁGINA (4 COLUNAS SIMULTÂNEAS) */}
+        {/* SEÇÃO 2: OS CARDS ATIVOS HORIZONTALMENTE NA PÁGINA */}
         <section className="mb-20">
           
           <div className="text-center mb-10">
@@ -366,379 +367,117 @@ export default function ConditionsAndFees() {
               Opções de Organização do Atendimento
             </h2>
             <p className="text-xs sm:text-sm text-luxury-gold-light mt-1 font-mono">
-              Compare as 4 modalidades e escolha o formato adequado à sua rotina
+              Compare as modalidades disponíveis e escolha o formato adequado à sua rotina
             </p>
           </div>
 
-          {/* GRID COM OS 4 CARDS LADO A LADO NA MESMA LINHA HORIZONTAL */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 items-stretch">
+          {/* GRID COM OS CARDS ATIVOS LADO A LADO NA MESMA LINHA HORIZONTAL */}
+          <div className={`grid grid-cols-1 ${
+            activePlans.length === 1 
+              ? 'max-w-md mx-auto' 
+              : activePlans.length === 2 
+                ? 'sm:grid-cols-2 max-w-3xl mx-auto' 
+                : activePlans.length === 3 
+                  ? 'sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto' 
+                  : 'sm:grid-cols-2 lg:grid-cols-4'
+          } gap-4 xl:gap-5 items-stretch`}>
 
-            {/* ========================================================= */}
-            {/* CARD 1: CONSULTA AVULSA */}
-            {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
-              
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
-                
-                {/* Background aura */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
+            {activePlans.map((plan) => (
+              <div 
+                key={plan.id}
+                className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/35 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full"
+              >
+                <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
+                  
+                  {/* Background aura */}
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
 
-                <div>
-                  {/* Header Row */}
-                  <div className="flex items-center justify-between gap-1.5 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      {plans.avulsa.badge}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <Clock className="w-3 h-3 text-luxury-gold" /> {plans.avulsa.periodLabel}
-                    </span>
-                  </div>
-
-                  {/* Icon & Title */}
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <User className="w-4 h-4" />
+                  <div>
+                    {/* Header Row */}
+                    <div className="flex items-center justify-between gap-1.5 mb-3">
+                      <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                        {plan.badge || 'Modalidade'}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                        <Clock className="w-3 h-3 text-luxury-gold" /> {plan.periodLabel || '50 min'}
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        {plans.avulsa.title}
-                      </h3>
-                      <p className="text-[10px] text-zinc-400 font-mono">
-                        {plans.avulsa.sessionsCount} atendimento individual
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/20 rounded-xl p-3.5 my-3.5 shadow-inner">
-                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários
+                    {/* Icon & Title */}
+                    <div className="flex items-center gap-2.5 mb-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                        {plan.id === 'avulsa' && <User className="w-4 h-4" />}
+                        {plan.id === 'mensal' && <Calendar className="w-4 h-4" />}
+                        {plan.id === 'bimestral' && <Layers className="w-4 h-4" />}
+                        {plan.id === 'trimestral' && <Sparkles className="w-4 h-4" />}
+                        {plan.isCustom && <Sparkles className="w-4 h-4 text-purple-300" />}
+                      </div>
+                      <div>
+                        <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
+                          {plan.title}
+                        </h3>
+                        <p className="text-[10px] text-zinc-400 font-mono">
+                          {plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-baseline gap-0.5 mt-0.5">
-                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.avulsa.finalPrice}</span>
-                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
+
+                    {/* Price Box */}
+                    <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
+                      <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                        Honorários
+                      </div>
+                      <div className="flex items-baseline gap-0.5 mt-0.5">
+                        <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                        <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plan.finalPrice}</span>
+                        <span className="text-xs font-serif text-luxury-gold-light">,00</span>
+                      </div>
+                      <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
+                        <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
+                        <span>{plan.installmentText}</span>
+                      </div>
                     </div>
-                    <div className="mt-1 text-[10px] text-zinc-400 font-mono">
-                      {plans.avulsa.installmentText}
-                    </div>
-                  </div>
 
-                  {/* Description */}
-                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    {plans.avulsa.description}
-                  </p>
-
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    {plans.avulsa.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Button */}
-                <div>
-                  <button
-                    onClick={() => handleFormalizationClick(plans.avulsa.paymentLink)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
-                      isAllChecked
-                        ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
-                        : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
-                    }`}
-                  >
-                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar {plans.avulsa.title.toLowerCase()}</span>
-                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                  </button>
-                  {!isAllChecked && (
-                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
-                      Marque as 4 confirmações acima
+                    {/* Description */}
+                    <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                      {plan.description}
                     </p>
-                  )}
-                </div>
 
-              </div>
-            </div>
-
-            {/* ========================================================= */}
-            {/* CARD 2: ACOMPANHAMENTO MENSAL */}
-            {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
-              
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
-                
-                {/* Background aura */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
-
-                <div>
-                  {/* Header Row */}
-                  <div className="flex items-center justify-between gap-1.5 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      {plans.mensal.badge}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.mensal.periodLabel}
-                    </span>
+                    {/* Features List */}
+                    <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                      {(plan.features || []).map((feat, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Icon & Title */}
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        {plans.mensal.title}
-                      </h3>
-                      <p className="text-[10px] text-zinc-400 font-mono">
-                        {plans.mensal.sessionsCount} atendimentos no mês
+                  {/* Button */}
+                  <div>
+                    <button
+                      onClick={() => handleFormalizationClick(plan.paymentLink)}
+                      className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
+                        isAllChecked
+                          ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
+                          : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
+                      }`}
+                    >
+                      {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                      <span>Formalizar {plan.title.toLowerCase()}</span>
+                      <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                    </button>
+                    {!isAllChecked && (
+                      <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
+                        Marque as 4 confirmações acima
                       </p>
-                    </div>
+                    )}
                   </div>
 
-                  {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
-                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários ({plans.mensal.sessionsCount} Sessões)
-                    </div>
-                    <div className="flex items-baseline gap-0.5 mt-0.5">
-                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.mensal.finalPrice}</span>
-                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
-                    </div>
-                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
-                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>{plans.mensal.installmentText}</span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    {plans.mensal.description}
-                  </p>
-
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    {plans.mensal.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
-
-                {/* Button */}
-                <div>
-                  <button
-                    onClick={() => handleFormalizationClick(plans.mensal.paymentLink)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
-                      isAllChecked
-                        ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
-                        : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
-                    }`}
-                  >
-                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar {plans.mensal.title.toLowerCase()}</span>
-                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                  </button>
-                  {!isAllChecked && (
-                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
-                      Marque as 4 confirmações acima
-                    </p>
-                  )}
-                </div>
-
               </div>
-            </div>
-
-            {/* ========================================================= */}
-            {/* CARD 3: ACOMPANHAMENTO BIMESTRAL */}
-            {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
-              
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
-                
-                {/* Background aura */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
-
-                <div>
-                  {/* Header Row */}
-                  <div className="flex items-center justify-between gap-1.5 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      {plans.bimestral.badge}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.bimestral.periodLabel}
-                    </span>
-                  </div>
-
-                  {/* Icon & Title */}
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Layers className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        {plans.bimestral.title}
-                      </h3>
-                      <p className="text-[10px] text-zinc-400 font-mono">
-                        {plans.bimestral.sessionsCount} atendimentos (2 meses)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
-                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários ({plans.bimestral.sessionsCount} Sessões)
-                    </div>
-                    <div className="flex items-baseline gap-0.5 mt-0.5">
-                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.bimestral.finalPrice}</span>
-                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
-                    </div>
-                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
-                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>{plans.bimestral.installmentText}</span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    {plans.bimestral.description}
-                  </p>
-
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    {plans.bimestral.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Button */}
-                <div>
-                  <button
-                    onClick={() => handleFormalizationClick(plans.bimestral.paymentLink)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
-                      isAllChecked
-                        ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
-                        : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
-                    }`}
-                  >
-                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar {plans.bimestral.title.toLowerCase()}</span>
-                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                  </button>
-                  {!isAllChecked && (
-                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
-                      Marque as 4 confirmações acima
-                    </p>
-                  )}
-                </div>
-
-              </div>
-            </div>
-
-            {/* ========================================================= */}
-            {/* CARD 4: ACOMPANHAMENTO TRIMESTRAL */}
-            {/* ========================================================= */}
-            <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/40 via-luxury-gold/15 to-white/5 hover:from-luxury-gold/70 hover:via-luxury-gold/40 hover:to-luxury-gold/20 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-luxury-gold/15 flex flex-col h-full">
-              
-              <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 xl:p-6 flex flex-col justify-between overflow-hidden">
-                
-                {/* Background aura */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-luxury-gold/5 rounded-full blur-2xl pointer-events-none group-hover:bg-luxury-gold/10 transition duration-500" />
-
-                <div>
-                  {/* Header Row */}
-                  <div className="flex items-center justify-between gap-1.5 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      {plans.trimestral.badge}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.trimestral.periodLabel}
-                    </span>
-                  </div>
-
-                  {/* Icon & Title */}
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        {plans.trimestral.title}
-                      </h3>
-                      <p className="text-[10px] text-zinc-400 font-mono">
-                        {plans.trimestral.sessionsCount} atendimentos (3 meses)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Price Box */}
-                  <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
-                    <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários ({plans.trimestral.sessionsCount} Sessões)
-                    </div>
-                    <div className="flex items-baseline gap-0.5 mt-0.5">
-                      <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.trimestral.finalPrice}</span>
-                      <span className="text-xs font-serif text-luxury-gold-light">,00</span>
-                    </div>
-                    <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
-                      <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>{plans.trimestral.installmentText}</span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    {plans.trimestral.description}
-                  </p>
-
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    {plans.trimestral.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Button */}
-                <div>
-                  <button
-                    onClick={() => handleFormalizationClick(plans.trimestral.paymentLink)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
-                      isAllChecked
-                        ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
-                        : 'bg-zinc-800/80 text-zinc-400 border border-white/10 hover:border-luxury-gold/30 hover:text-zinc-200'
-                    }`}
-                  >
-                    {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar {plans.trimestral.title.toLowerCase()}</span>
-                    <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                  </button>
-                  {!isAllChecked && (
-                    <p className="text-[9px] text-zinc-500 text-center font-mono mt-1.5">
-                      Marque as 4 confirmações acima
-                    </p>
-                  )}
-                </div>
-
-              </div>
-            </div>
+            ))}
 
           </div>
 
