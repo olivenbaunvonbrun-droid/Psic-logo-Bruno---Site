@@ -21,12 +21,16 @@ import {
   Shield, 
   Settings 
 } from 'lucide-react';
-import { getPricingSettings, PricingSettings } from '../utils/pricingConfig';
+import { 
+  fetchPricingSettingsFromCloud, 
+  DEFAULT_PRICING_SETTINGS, 
+  PricingSettings 
+} from '../utils/pricingConfig';
 
 export default function ConditionsAndFees() {
-  const [pricingSettings, setPricingSettings] = useState<PricingSettings>(getPricingSettings);
+  const [pricingSettings, setPricingSettings] = useState<PricingSettings>(DEFAULT_PRICING_SETTINGS);
 
-  // Configuração técnica: Garantir meta robots noindex/nofollow dinamicamente
+  // Configuração técnica: Garantir meta robots noindex/nofollow e carregar dados em tempo real da nuvem
   useEffect(() => {
     let metaRobots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
     if (!metaRobots) {
@@ -39,9 +43,18 @@ export default function ConditionsAndFees() {
     // Rolar ao topo ao carregar a página
     window.scrollTo(0, 0);
 
+    // Sincronização em tempo real com a Nuvem Compartilhada
+    fetchPricingSettingsFromCloud().then(cloudSettings => {
+      setPricingSettings(cloudSettings);
+    });
+
     // Listener para atualizações de preço feitas pelo painel de config
-    const handlePricingUpdate = () => {
-      setPricingSettings(getPricingSettings());
+    const handlePricingUpdate = (e: any) => {
+      if (e && e.detail) {
+        setPricingSettings(e.detail);
+      } else {
+        fetchPricingSettingsFromCloud().then(setPricingSettings);
+      }
     };
     window.addEventListener('pricing_config_updated', handlePricingUpdate);
 

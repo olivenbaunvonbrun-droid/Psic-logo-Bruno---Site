@@ -15,7 +15,7 @@ export interface PlanConfig {
 }
 
 export interface PricingSettings {
-  baseSessionPrice: number; // Preço base da sessão avulsa (ex: 147)
+  baseSessionPrice: number;
   plans: {
     avulsa: PlanConfig;
     mensal: PlanConfig;
@@ -110,52 +110,138 @@ export const DEFAULT_PRICING_SETTINGS: PricingSettings = {
   }
 };
 
-const STORAGE_KEY = 'bruno_psicologia_pricing_config_v1';
+// ID Único do Objeto na Nuvem Pública Compartilhada (Real-time Cloud Database)
+export const CLOUD_OBJECT_ID = 'ff808181a061cdc401a061ebff320071';
+export const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
 
-export function getPricingSettings(): PricingSettings {
-  if (typeof window === 'undefined') {
-    return DEFAULT_PRICING_SETTINGS;
-  }
+// Converter dados da nuvem para a estrutura PricingSettings
+function mapCloudDataToSettings(cloudData: any): PricingSettings {
+  if (!cloudData) return DEFAULT_PRICING_SETTINGS;
 
+  return {
+    baseSessionPrice: Number(cloudData.baseSessionPrice) || DEFAULT_PRICING_SETTINGS.baseSessionPrice,
+    plans: {
+      avulsa: {
+        ...DEFAULT_PRICING_SETTINGS.plans.avulsa,
+        badge: cloudData.avulsa_badge || DEFAULT_PRICING_SETTINGS.plans.avulsa.badge,
+        finalPrice: Number(cloudData.avulsa_price) || DEFAULT_PRICING_SETTINGS.plans.avulsa.finalPrice,
+        paymentLink: cloudData.avulsa_link || DEFAULT_PRICING_SETTINGS.plans.avulsa.paymentLink,
+        installmentText: cloudData.avulsa_inst_text || DEFAULT_PRICING_SETTINGS.plans.avulsa.installmentText
+      },
+      mensal: {
+        ...DEFAULT_PRICING_SETTINGS.plans.mensal,
+        badge: cloudData.mensal_badge || DEFAULT_PRICING_SETTINGS.plans.mensal.badge,
+        finalPrice: Number(cloudData.mensal_price) || DEFAULT_PRICING_SETTINGS.plans.mensal.finalPrice,
+        discountPercent: Number(cloudData.mensal_discount) ?? DEFAULT_PRICING_SETTINGS.plans.mensal.discountPercent,
+        installmentsCount: Number(cloudData.mensal_installments) || DEFAULT_PRICING_SETTINGS.plans.mensal.installmentsCount,
+        installmentText: cloudData.mensal_inst_text || DEFAULT_PRICING_SETTINGS.plans.mensal.installmentText,
+        paymentLink: cloudData.mensal_link || DEFAULT_PRICING_SETTINGS.plans.mensal.paymentLink
+      },
+      bimestral: {
+        ...DEFAULT_PRICING_SETTINGS.plans.bimestral,
+        badge: cloudData.bimestral_badge || DEFAULT_PRICING_SETTINGS.plans.bimestral.badge,
+        finalPrice: Number(cloudData.bimestral_price) || DEFAULT_PRICING_SETTINGS.plans.bimestral.finalPrice,
+        discountPercent: Number(cloudData.bimestral_discount) ?? DEFAULT_PRICING_SETTINGS.plans.bimestral.discountPercent,
+        installmentsCount: Number(cloudData.bimestral_installments) || DEFAULT_PRICING_SETTINGS.plans.bimestral.installmentsCount,
+        installmentText: cloudData.bimestral_inst_text || DEFAULT_PRICING_SETTINGS.plans.bimestral.installmentText,
+        paymentLink: cloudData.bimestral_link || DEFAULT_PRICING_SETTINGS.plans.bimestral.paymentLink
+      },
+      trimestral: {
+        ...DEFAULT_PRICING_SETTINGS.plans.trimestral,
+        badge: cloudData.trimestral_badge || DEFAULT_PRICING_SETTINGS.plans.trimestral.badge,
+        finalPrice: Number(cloudData.trimestral_price) || DEFAULT_PRICING_SETTINGS.plans.trimestral.finalPrice,
+        discountPercent: Number(cloudData.trimestral_discount) ?? DEFAULT_PRICING_SETTINGS.plans.trimestral.discountPercent,
+        installmentsCount: Number(cloudData.trimestral_installments) || DEFAULT_PRICING_SETTINGS.plans.trimestral.installmentsCount,
+        installmentText: cloudData.trimestral_inst_text || DEFAULT_PRICING_SETTINGS.plans.trimestral.installmentText,
+        paymentLink: cloudData.trimestral_link || DEFAULT_PRICING_SETTINGS.plans.trimestral.paymentLink
+      }
+    }
+  };
+}
+
+// Converter estrutura PricingSettings para os campos da nuvem
+function mapSettingsToCloudData(settings: PricingSettings): any {
+  return {
+    baseSessionPrice: settings.baseSessionPrice,
+    avulsa_badge: settings.plans.avulsa.badge,
+    avulsa_price: settings.plans.avulsa.finalPrice,
+    avulsa_link: settings.plans.avulsa.paymentLink,
+    avulsa_inst_text: settings.plans.avulsa.installmentText,
+
+    mensal_badge: settings.plans.mensal.badge,
+    mensal_price: settings.plans.mensal.finalPrice,
+    mensal_discount: settings.plans.mensal.discountPercent,
+    mensal_installments: settings.plans.mensal.installmentsCount,
+    mensal_inst_text: settings.plans.mensal.installmentText,
+    mensal_link: settings.plans.mensal.paymentLink,
+
+    bimestral_badge: settings.plans.bimestral.badge,
+    bimestral_price: settings.plans.bimestral.finalPrice,
+    bimestral_discount: settings.plans.bimestral.discountPercent,
+    bimestral_installments: settings.plans.bimestral.installmentsCount,
+    bimestral_inst_text: settings.plans.bimestral.installmentText,
+    bimestral_link: settings.plans.bimestral.paymentLink,
+
+    trimestral_badge: settings.plans.trimestral.badge,
+    trimestral_price: settings.plans.trimestral.finalPrice,
+    trimestral_discount: settings.plans.trimestral.discountPercent,
+    trimestral_installments: settings.plans.trimestral.installmentsCount,
+    trimestral_inst_text: settings.plans.trimestral.installmentText,
+    trimestral_link: settings.plans.trimestral.paymentLink
+  };
+}
+
+// Buscar configurações diretamente da Nuvem em tempo real (para todos os visitantes)
+export async function fetchPricingSettingsFromCloud(): Promise<PricingSettings> {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Mesclar para garantir compatibilidade caso novos campos sejam adicionados
-      return {
-        ...DEFAULT_PRICING_SETTINGS,
-        ...parsed,
-        plans: {
-          ...DEFAULT_PRICING_SETTINGS.plans,
-          ...(parsed.plans || {})
-        }
-      };
+    const res = await fetch(CLOUD_API_URL, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+
+    if (res.ok) {
+      const obj = await res.json();
+      if (obj && obj.data) {
+        return mapCloudDataToSettings(obj.data);
+      }
     }
   } catch (err) {
-    console.error('Erro ao ler configurações de preços do localStorage:', err);
+    console.warn('Conexão em tempo real com a nuvem indisponível, usando valores oficiais:', err);
   }
 
   return DEFAULT_PRICING_SETTINGS;
 }
 
-export function savePricingSettings(settings: PricingSettings): void {
-  if (typeof window === 'undefined') return;
+// Salvar configurações na Nuvem em tempo real (disponível imediatamente para o mundo todo)
+export async function savePricingSettingsToCloud(settings: PricingSettings): Promise<boolean> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    window.dispatchEvent(new Event('pricing_config_updated'));
+    const cloudPayload = mapSettingsToCloudData(settings);
+
+    const res = await fetch(CLOUD_API_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'psicologia_bruno_pricing_cloud_v1',
+        data: cloudPayload
+      })
+    });
+
+    if (res.ok) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pricing_config_updated', { detail: settings }));
+      }
+      return true;
+    }
   } catch (err) {
-    console.error('Erro ao salvar configurações de preços no localStorage:', err);
+    console.error('Erro ao salvar na nuvem:', err);
   }
+
+  return false;
 }
 
-export function resetPricingSettings(): PricingSettings {
-  if (typeof window !== 'undefined') {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      window.dispatchEvent(new Event('pricing_config_updated'));
-    } catch (err) {
-      console.error('Erro ao resetar configurações de preços:', err);
-    }
-  }
+// Restaurar valores oficiais na Nuvem
+export async function resetPricingSettingsInCloud(): Promise<PricingSettings> {
+  await savePricingSettingsToCloud(DEFAULT_PRICING_SETTINGS);
   return DEFAULT_PRICING_SETTINGS;
 }

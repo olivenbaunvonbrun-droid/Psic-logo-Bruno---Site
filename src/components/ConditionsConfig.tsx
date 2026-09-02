@@ -32,19 +32,21 @@ import {
   X,
   LogOut,
   KeyRound,
-  Mail
+  Mail,
+  Globe,
+  Loader2
 } from 'lucide-react';
 import { 
   PricingSettings, 
-  getPricingSettings, 
-  savePricingSettings, 
-  resetPricingSettings,
+  DEFAULT_PRICING_SETTINGS,
+  fetchPricingSettingsFromCloud,
+  savePricingSettingsToCloud,
+  resetPricingSettingsInCloud,
   PlanConfig
 } from '../utils/pricingConfig';
 
 // Credenciais de acesso administrativo
 const ADMIN_CREDENTIALS = {
-  // Aceita o email fornecido pelo usuário (e também a variação com 1 'l')
   validEmails: ['olivenbaunvonbrun@gmaill.com', 'olivenbaunvonbrun@gmail.com'],
   password: 'Bruno@383991Br@Psicologia'
 };
@@ -67,8 +69,10 @@ export default function ConditionsConfig() {
   const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
 
   // Estados do Dashboard
-  const [initialSettings] = useState<PricingSettings>(getPricingSettings);
-  const [settings, setSettings] = useState<PricingSettings>(getPricingSettings);
+  const [initialSettings, setInitialSettings] = useState<PricingSettings>(DEFAULT_PRICING_SETTINGS);
+  const [settings, setSettings] = useState<PricingSettings>(DEFAULT_PRICING_SETTINGS);
+  const [isLoadingCloud, setIsLoadingCloud] = useState(true);
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
   
@@ -77,7 +81,7 @@ export default function ConditionsConfig() {
   const [acknowledgedCheckoutSync, setAcknowledgedCheckoutSync] = useState(false);
   const [copiedLinkKey, setCopiedLinkKey] = useState<string | null>(null);
 
-  // Configuração técnica: noindex/nofollow para a página de config
+  // Configuração técnica: noindex/nofollow e carregamento inicial da nuvem
   useEffect(() => {
     let metaRobots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
     if (!metaRobots) {
@@ -87,6 +91,13 @@ export default function ConditionsConfig() {
     }
     metaRobots.content = 'noindex, nofollow';
     window.scrollTo(0, 0);
+
+    // Carregar configurações reais da nuvem
+    fetchPricingSettingsFromCloud().then((cloudSettings) => {
+      setInitialSettings(cloudSettings);
+      setSettings(cloudSettings);
+      setIsLoadingCloud(false);
+    });
   }, []);
 
   const planKeys: (keyof PricingSettings['plans'])[] = ['avulsa', 'mensal', 'bimestral', 'trimestral'];
@@ -262,19 +273,30 @@ export default function ConditionsConfig() {
     executeSave();
   };
 
-  // Executar persistência real
-  const executeSave = () => {
-    savePricingSettings(settings);
-    setShowCheckoutWarningModal(false);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 4000);
+  // Executar persistência real na Nuvem Compartilhada Global
+  const executeSave = async () => {
+    setIsSavingCloud(true);
+    const success = await savePricingSettingsToCloud(settings);
+    setIsSavingCloud(false);
+
+    if (success) {
+      setInitialSettings(settings);
+      setShowCheckoutWarningModal(false);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4500);
+    } else {
+      alert('Erro ao sincronizar com a nuvem. Verifique sua conexão com a internet.');
+    }
   };
 
-  // Resetar para os padrões
-  const handleReset = () => {
-    if (window.confirm('Deseja realmente restaurar todos os preços e links de contratação para os valores originais de fábrica?')) {
-      const restored = resetPricingSettings();
+  // Resetar para os padrões na nuvem
+  const handleReset = async () => {
+    if (window.confirm('Deseja realmente restaurar todos os preços e links de contratação na nuvem para os valores originais?')) {
+      setIsSavingCloud(true);
+      const restored = await resetPricingSettingsInCloud();
       setSettings(restored);
+      setInitialSettings(restored);
+      setIsSavingCloud(false);
       setAcknowledgedCheckoutSync(false);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3500);
@@ -286,7 +308,7 @@ export default function ConditionsConfig() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `honorarios_psicologia_config_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `honorarios_psicologia_cloud_backup_${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -322,7 +344,7 @@ export default function ConditionsConfig() {
                 Painel Administrativo
               </h2>
               <p className="text-xs text-luxury-gold-light font-mono mt-1">
-                Acesso restrito às configurações de honorários
+                Acesso restrito às configurações globais de honorários
               </p>
             </div>
 
@@ -455,12 +477,13 @@ export default function ConditionsConfig() {
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
                   <span>Configurações de Planos & Checkout</span>
-                  <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30">
-                    Sessão Ativa
+                  <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30 flex items-center gap-1">
+                    <Globe className="w-3 h-3" />
+                    <span>Nuvem Ativa</span>
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  Logado como: olivenbaunvonbrun@gmaill.com
+                  Sincronização global automática • Logado: olivenbaunvonbrun@gmaill.com
                 </p>
               </div>
             </div>
@@ -469,6 +492,7 @@ export default function ConditionsConfig() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleReset}
+              disabled={isSavingCloud}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-red-300 text-xs px-3.5 py-2 rounded-xl border border-white/10 hover:border-red-500/30 transition cursor-pointer"
               title="Restaurar valores e links padrão"
             >
@@ -487,10 +511,20 @@ export default function ConditionsConfig() {
 
             <button
               onClick={handleSaveClick}
+              disabled={isSavingCloud}
               className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-lg shadow-luxury-gold/20 hover:brightness-110 active:scale-95 transition cursor-pointer"
             >
-              <Save className="w-4 h-4" />
-              <span>Salvar Alterações</span>
+              {isSavingCloud ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Salvando na Nuvem...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Salvar na Nuvem</span>
+                </>
+              )}
             </button>
 
             <button
@@ -517,8 +551,8 @@ export default function ConditionsConfig() {
           >
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="text-xs">
-              <p className="font-semibold text-white">Configurações Salvas com Sucesso!</p>
-              <p className="text-emerald-300/80">A página de planos e os links de contratação já estão atualizados.</p>
+              <p className="font-semibold text-white">Configurações Salvas na Nuvem!</p>
+              <p className="text-emerald-300/80">Qualquer pessoa que acessar o link da página de planos já verá os novos valores e links imediatamente.</p>
             </div>
           </motion.div>
         )}
@@ -540,7 +574,7 @@ export default function ConditionsConfig() {
               initial={{ opacity: 0, scale: 0.92, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#14120f] to-[#0a0a08] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
+              className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#14120f] to-[#0a0b0f] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
             >
               {/* Top Accent Line */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-luxury-gold to-amber-600" />
@@ -627,10 +661,20 @@ export default function ConditionsConfig() {
                 </button>
                 <button
                   onClick={executeSave}
+                  disabled={isSavingCloud}
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition cursor-pointer"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>Confirmar & Salvar no Site</span>
+                  {isSavingCloud ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Salvando na Nuvem...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Confirmar & Salvar Globalmente</span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -1050,22 +1094,32 @@ export default function ConditionsConfig() {
         <div className="sticky bottom-6 z-40 max-w-2xl mx-auto bg-luxury-charcoal/95 border border-luxury-gold/40 p-4 sm:p-5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4">
           <div className="text-xs text-zinc-300">
             <span className="font-semibold text-white flex items-center gap-1.5">
-              <span>Aplicar alterações no site?</span>
+              <span>Salvar alterações na Nuvem?</span>
               {hasPriceModifications && (
                 <span className="text-amber-400 font-mono text-[10px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
                   {modifiedPricePlans.length} preços alterados
                 </span>
               )}
             </span>
-            <p className="text-[10px] text-zinc-400 font-mono">As alterações valem imediatamente para todos os visitantes.</p>
+            <p className="text-[10px] text-zinc-400 font-mono">As alterações valem imediatamente para qualquer pessoa que acessar a página de planos.</p>
           </div>
 
           <button
             onClick={handleSaveClick}
+            disabled={isSavingCloud}
             className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg shadow-luxury-gold/25 hover:brightness-110 active:scale-95 transition cursor-pointer shrink-0"
           >
-            <Save className="w-4 h-4" />
-            <span>Salvar Tudo</span>
+            {isSavingCloud ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Sincronizando...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Salvar Tudo</span>
+              </>
+            )}
           </button>
         </div>
 
