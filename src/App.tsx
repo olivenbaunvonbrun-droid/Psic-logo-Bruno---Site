@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import LandPage from './components/LandPage';
 import ConditionsAndFees from './components/ConditionsAndFees';
 import ConditionsConfig from './components/ConditionsConfig';
+import FirstAppointment from './components/FirstAppointment';
 
 export default function App() {
   const getPath = () => {
@@ -24,6 +25,9 @@ export default function App() {
         return '/condicoes-de-atendimento/config';
       }
       if (hash === '#landpage') return '/landpage';
+      if (hash === '#primeiro-atendimento' || hash === '#primeira-consulta') {
+        return '/primeiro-atendimento';
+      }
       if (hash === '#condicoes-de-atendimento' || hash === '#formalizacao-do-acompanhamento') {
         return '/condicoes-de-atendimento';
       }
@@ -67,6 +71,18 @@ export default function App() {
     currentPath.startsWith('/formalizacao-do-acompanhamento/config')
   ) {
     return <ConditionsConfig />;
+  }
+
+  // ROTA DA PÁGINA DO PRIMEIRO ATENDIMENTO (CARD ÚNICO)
+  if (
+    currentPath === '/primeiro-atendimento' || 
+    currentPath === '/primeiro-atendimento/' ||
+    currentPath.startsWith('/primeiro-atendimento') ||
+    currentPath === '/primeira-consulta' ||
+    currentPath === '/primeira-consulta/' ||
+    currentPath.startsWith('/primeira-consulta')
+  ) {
+    return <FirstAppointment />;
   }
 
   // ROTA DA PÁGINA DE CONDIÇÕES E HONORÁRIOS

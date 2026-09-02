@@ -33,10 +33,10 @@ export default function LandPage() {
     setModalOpen(true);
   };
 
-  const handleNavigateToConditions = () => {
+  const handleNavigateToFirstAppointment = () => {
     setModalOpen(false);
     // Atualiza a URL e dispara o evento para navegação SPA
-    window.history.pushState({}, '', '/condicoes-de-atendimento');
+    window.history.pushState({}, '', '/primeiro-atendimento');
     window.dispatchEvent(new PopStateEvent('popstate'));
     window.scrollTo(0, 0);
   };
@@ -745,11 +745,11 @@ export default function LandPage() {
               {/* Botões do Modal */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-luxury-gold/15">
                 <button
-                  onClick={handleNavigateToConditions}
+                  onClick={handleNavigateToFirstAppointment}
                   className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition cursor-pointer"
                 >
-                  <FileText className="w-4 h-4" />
-                  <span>Ver modalidades de acompanhamento</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Contratar meu primeiro atendimento</span>
                 </button>
 
                 <button
@@ -760,6 +760,11 @@ export default function LandPage() {
                   <span>Falar pelo WhatsApp</span>
                 </button>
               </div>
+
+              {/* Informação sobre o WhatsApp */}
+              <p className="text-[11px] text-zinc-400 text-center font-sans mt-3">
+                <strong className="text-luxury-gold-light">Importante:</strong> Após a confirmação do pagamento, você será redirecionado para o WhatsApp do psicólogo para alinhamento e agendamento da sessão.
+              </p>
 
             </motion.div>
           </div>

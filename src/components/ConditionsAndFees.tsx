@@ -109,8 +109,9 @@ export default function ConditionsAndFees() {
     "Olá, Bruno! Acessei a página de condições e honorários e gostaria de tirar algumas dúvidas sobre as modalidades de acompanhamento."
   );
 
-  // Filtrar apenas os planos ATIVOS para exibição pública
-  const activePlans = pricingSettings.plans.filter(p => p.active);
+  // Filtrar apenas os planos ATIVOS (excluindo o plano selecionado para Primeiro Atendimento)
+  const firstAppointmentId = pricingSettings.firstAppointmentPlanId || 'avulsa';
+  const activePlans = pricingSettings.plans.filter(p => p.active && p.id !== firstAppointmentId);
 
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">

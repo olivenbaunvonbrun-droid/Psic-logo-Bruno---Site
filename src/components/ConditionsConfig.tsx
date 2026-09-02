@@ -41,7 +41,8 @@ import {
   ListPlus,
   MousePointerClick,
   Type,
-  FileText
+  FileText,
+  Star
 } from 'lucide-react';
 import { 
   PricingSettings, 
@@ -371,6 +372,14 @@ export default function ConditionsConfig() {
         }
         return p;
       })
+    }));
+  };
+
+  // Definir qual plano será exibido exclusivamente no Primeiro Atendimento (/primeiro-atendimento)
+  const handleSetFirstAppointmentPlan = (planId: string) => {
+    setSettings(prev => ({
+      ...prev,
+      firstAppointmentPlanId: planId
     }));
   };
 
@@ -1030,24 +1039,49 @@ export default function ConditionsConfig() {
                 const pricePerSession = (plan.finalPrice / sessions).toFixed(2).replace('.', ',');
                 const savingsNominal = Math.max(0, nominalTotal - plan.finalPrice);
 
+                const isFirstAppointmentPlan = (settings.firstAppointmentPlanId || 'avulsa') === plan.id;
+
                 return (
                   <div 
                     key={plan.id}
                     className={`bg-gradient-to-b from-luxury-charcoal/95 to-luxury-black border rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col justify-between transition-all duration-300 ${
-                      !plan.active 
-                        ? 'opacity-60 border-zinc-700/50 bg-black/40' 
-                        : isPriceEdited 
-                          ? 'border-amber-500/60 ring-1 ring-amber-500/30' 
-                          : 'border-luxury-gold/30'
+                      isFirstAppointmentPlan
+                        ? 'border-luxury-gold ring-2 ring-luxury-gold/40 shadow-luxury-gold/15'
+                        : !plan.active 
+                          ? 'opacity-60 border-zinc-700/50 bg-black/40' 
+                          : isPriceEdited 
+                            ? 'border-amber-500/60 ring-1 ring-amber-500/30' 
+                            : 'border-luxury-gold/30'
                     }`}
                   >
                     <div>
-                      {/* Top Header com Status Ativo/Inativo e Botões de Ação */}
-                      <div className="flex items-center justify-between border-b border-luxury-gold/20 pb-4 mb-5 flex-wrap gap-2">
-                        <div className="flex items-center gap-2.5">
+                      {/* Top Header com Status Ativo/Inativo, Destaque 1º Atendimento e Botões de Ação */}
+                      <div className="flex items-center justify-between border-b border-luxury-gold/20 pb-4 mb-4 flex-wrap gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          
+                          {/* Botão / Badge do Primeiro Atendimento */}
+                          {isFirstAppointmentPlan ? (
+                            <span 
+                              className="flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold px-3 py-1 rounded-full border bg-luxury-gold/25 border-luxury-gold text-luxury-gold-light shadow-sm shadow-luxury-gold/20"
+                              title="Este plano é o card exibido exclusivamente na página do Primeiro Atendimento (/primeiro-atendimento) e fica oculto da página de múltiplos planos"
+                            >
+                              <Star className="w-3 h-3 text-luxury-gold fill-luxury-gold" />
+                              <span>1º Atendimento (Exclusivo)</span>
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleSetFirstAppointmentPlan(plan.id)}
+                              className="flex items-center gap-1.5 text-[10px] font-mono uppercase font-medium px-2.5 py-1 rounded-full border bg-black/40 border-white/10 hover:border-luxury-gold/60 text-zinc-400 hover:text-luxury-gold transition cursor-pointer"
+                              title="Clique para definir este plano como o card exclusivo do Primeiro Atendimento"
+                            >
+                              <Star className="w-3 h-3 text-zinc-500" />
+                              <span>Definir como 1º Atendimento</span>
+                            </button>
+                          )}
+
                           <button
                             onClick={() => handleTogglePlanActive(plan.id)}
-                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold px-3 py-1 rounded-full border transition cursor-pointer ${
+                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase font-bold px-2.5 py-1 rounded-full border transition cursor-pointer ${
                               plan.active 
                                 ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25' 
                                 : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:bg-zinc-700'
@@ -1055,7 +1089,7 @@ export default function ConditionsConfig() {
                             title="Clique para ativar ou inativar este plano"
                           >
                             <span className={`w-2 h-2 rounded-full ${plan.active ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
-                            <span>{plan.active ? 'Ativo no Site' : 'Inativo (Oculto)'}</span>
+                            <span>{plan.active ? 'Ativo' : 'Inativo'}</span>
                           </button>
 
                           {plan.isCustom && (
@@ -1090,6 +1124,14 @@ export default function ConditionsConfig() {
                           </button>
                         </div>
                       </div>
+
+                      {/* Notificação explicativa se for o plano do Primeiro Atendimento */}
+                      {isFirstAppointmentPlan && (
+                        <div className="mb-4 p-2.5 rounded-xl bg-luxury-gold/10 border border-luxury-gold/30 text-[11px] text-luxury-gold-light flex items-center gap-2">
+                          <Star className="w-4 h-4 text-luxury-gold fill-luxury-gold shrink-0" />
+                          <span>Este plano é exibido individualmente na página <strong>/primeiro-atendimento</strong> e fica oculto da página geral de planos <strong>/condicoes-de-atendimento</strong>.</span>
+                        </div>
+                      )}
 
                       {/* 1. SEÇÃO DE CABEÇALHO DO CARD (TÍTULO, BADGE, PERÍODO, ÍCONE) */}
                       <div className="bg-luxury-black/50 p-4 rounded-2xl border border-white/5 mb-5 space-y-3.5">
@@ -1427,84 +1469,191 @@ export default function ConditionsConfig() {
               })}
             </div>
           ) : (
-            /* SIMULADOR VISUAL REAL DOS PLANOS ATIVOS */
-            <div className="bg-luxury-black/60 p-6 rounded-3xl border border-luxury-gold/30">
-              <p className="text-xs text-luxury-gold-light font-mono mb-6 text-center">
-                Visualização de como a página pública exibirá apenas os planos ativos ({settings.plans.filter(p => p.active).length} visíveis):
-              </p>
+            /* SIMULADOR VISUAL REAL DOS PLANOS */
+            <div className="bg-luxury-black/60 p-6 rounded-3xl border border-luxury-gold/30 space-y-8">
+              
+              {/* 1. PRÉVIA DA PÁGINA DE PRIMEIRO ATENDIMENTO */}
+              <div>
+                <div className="flex items-center justify-between border-b border-luxury-gold/20 pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-luxury-gold fill-luxury-gold" />
+                    <h3 className="text-sm font-serif font-semibold text-white">
+                      Prévia da Página de Primeiro Atendimento (<span className="text-luxury-gold-light font-mono">/primeiro-atendimento</span>)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-mono">
+                    Card único definido para quem vem da Landpage
+                  </span>
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 items-stretch">
-                {settings.plans.filter(p => p.active).map((plan) => {
+                {(() => {
+                  const firstPlan = settings.plans.find(p => p.id === (settings.firstAppointmentPlanId || 'avulsa')) || settings.plans.find(p => p.active) || settings.plans[0];
+                  if (!firstPlan) return null;
+
                   return (
-                    <div key={plan.id} className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 flex flex-col h-full">
-                      <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 flex flex-col justify-between overflow-hidden">
-                        <div>
-                          <div className="flex items-center justify-between gap-1.5 mb-3">
-                            <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                              {plan.badge}
-                            </span>
-                            <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                              <Clock className="w-3 h-3 text-luxury-gold" /> {plan.periodLabel || '50 min'}
-                            </span>
+                    <div className="max-w-md mx-auto">
+                      <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/60 via-luxury-gold/30 to-luxury-gold/10 shadow-xl flex flex-col">
+                        <div className="relative bg-gradient-to-b from-[#181a24] via-[#101218] to-[#0a0b0f] rounded-[23px] p-6 flex flex-col justify-between overflow-hidden">
+                          <div>
+                            <div className="flex items-center justify-between gap-1.5 mb-3">
+                              <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/15 border border-luxury-gold/30 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                                {firstPlan.badge || 'Pontual'}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/50 px-2 py-0.5 rounded-full border border-white/5">
+                                <Clock className="w-3 h-3 text-luxury-gold" /> {firstPlan.periodLabel || '50 min'}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 mb-3">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/40 flex items-center justify-center text-luxury-gold shrink-0">
+                                {renderPlanIcon(firstPlan.iconName)}
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-serif text-white font-semibold leading-tight">
+                                  {firstPlan.title}
+                                </h3>
+                                <p className="text-[10px] text-zinc-400 font-mono">
+                                  {firstPlan.sessionsSubtitle || '1 atendimento individual dedicado (50 min)'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/30 rounded-xl p-3.5 my-3.5 shadow-inner">
+                              <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                                Honorários Profissionais
+                              </div>
+                              <div className="flex items-baseline gap-0.5 mt-0.5">
+                                <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                                <span className="text-3xl font-serif font-bold text-white tracking-tight">{firstPlan.finalPrice}</span>
+                                <span className="text-xs font-serif text-luxury-gold-light">,00</span>
+                              </div>
+                              <div className="mt-1 text-[10px] text-luxury-gold-light font-medium flex items-center gap-1">
+                                <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
+                                <span>{firstPlan.installmentText}</span>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4">
+                              {firstPlan.description}
+                            </p>
+
+                            <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                              {(firstPlan.features || []).map((feat, idx) => (
+                                <li key={idx} className="flex items-center gap-2">
+                                  <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                                  <span>{feat}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
 
-                          <div className="flex items-center gap-2.5 mb-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0">
-                              {renderPlanIcon(plan.iconName)}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-serif text-white font-semibold leading-tight">
-                                {plan.title}
-                              </h3>
-                              <p className="text-[10px] text-zinc-400 font-mono">
-                                {plan.sessionsSubtitle || (plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`)}
-                              </p>
-                            </div>
+                          <div>
+                            <button
+                              onClick={() => window.open(firstPlan.paymentLink, '_blank')}
+                              className="w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-xs uppercase tracking-wider font-semibold bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 cursor-pointer shadow-lg"
+                            >
+                              <Unlock className="w-3.5 h-3.5" />
+                              <span>{firstPlan.buttonText || 'Contratar meu primeiro atendimento'}</span>
+                              <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                            </button>
                           </div>
-
-                          <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/20 rounded-xl p-3.5 my-3.5">
-                            <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                              Honorários
-                            </div>
-                            <div className="flex items-baseline gap-0.5 mt-0.5">
-                              <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                              <span className="text-2xl font-serif font-bold text-white tracking-tight">{plan.finalPrice}</span>
-                              <span className="text-xs font-serif text-luxury-gold-light">,00</span>
-                            </div>
-                            <div className="mt-1 text-[10px] text-luxury-gold-light font-medium">
-                              {plan.installmentText}
-                            </div>
-                          </div>
-
-                          <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                            {plan.description}
-                          </p>
-
-                          <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                            {(plan.features || []).map((feat, idx) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                                <span>{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div>
-                          <button
-                            onClick={() => window.open(plan.paymentLink, '_blank')}
-                            className="w-full flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl text-[11px] uppercase tracking-wider font-semibold bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 cursor-pointer"
-                          >
-                            <Unlock className="w-3.5 h-3.5" />
-                            <span>{plan.buttonText || `Formalizar ${plan.title}`}</span>
-                            <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
-                          </button>
                         </div>
                       </div>
                     </div>
                   );
-                })}
+                })()}
               </div>
+
+              {/* 2. PRÉVIA DA PÁGINA DE PLANOS GERAIS */}
+              <div>
+                <div className="flex items-center justify-between border-b border-luxury-gold/20 pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-luxury-gold" />
+                    <h3 className="text-sm font-serif font-semibold text-white">
+                      Prévia da Página de Planos Gerais (<span className="text-luxury-gold-light font-mono">/condicoes-de-atendimento</span>)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-mono">
+                    Exibe todos os planos ativos exceto o do 1º Atendimento
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5 items-stretch">
+                  {settings.plans
+                    .filter(p => p.active && p.id !== (settings.firstAppointmentPlanId || 'avulsa'))
+                    .map((plan) => {
+                      return (
+                        <div key={plan.id} className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/30 via-luxury-gold/10 to-white/5 flex flex-col h-full">
+                          <div className="relative h-full bg-gradient-to-b from-[#161822] via-[#101218] to-[#0a0b0f] rounded-[23px] p-5 flex flex-col justify-between overflow-hidden">
+                            <div>
+                              <div className="flex items-center justify-between gap-1.5 mb-3">
+                                <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
+                                  {plan.badge}
+                                </span>
+                                <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                                  <Clock className="w-3 h-3 text-luxury-gold" /> {plan.periodLabel || '50 min'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 mb-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0">
+                                  {renderPlanIcon(plan.iconName)}
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-serif text-white font-semibold leading-tight">
+                                    {plan.title}
+                                  </h3>
+                                  <p className="text-[10px] text-zinc-400 font-mono">
+                                    {plan.sessionsSubtitle || (plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/20 rounded-xl p-3.5 my-3.5">
+                                <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
+                                  Honorários
+                                </div>
+                                <div className="flex items-baseline gap-0.5 mt-0.5">
+                                  <span className="text-xs font-serif text-luxury-gold-light">R$</span>
+                                  <span className="text-2xl font-serif font-bold text-white tracking-tight">{plan.finalPrice}</span>
+                                  <span className="text-xs font-serif text-luxury-gold-light">,00</span>
+                                </div>
+                                <div className="mt-1 text-[10px] text-luxury-gold-light font-medium">
+                                  {plan.installmentText}
+                                </div>
+                              </div>
+
+                              <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
+                                {plan.description}
+                              </p>
+
+                              <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
+                                {(plan.features || []).map((feat, idx) => (
+                                  <li key={idx} className="flex items-center gap-2">
+                                    <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                                    <span>{feat}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <button
+                                onClick={() => window.open(plan.paymentLink, '_blank')}
+                                className="w-full flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl text-[11px] uppercase tracking-wider font-semibold bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 cursor-pointer"
+                              >
+                                <Unlock className="w-3.5 h-3.5" />
+                                <span>{plan.buttonText || `Formalizar ${plan.title}`}</span>
+                                <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
             </div>
           )}
 

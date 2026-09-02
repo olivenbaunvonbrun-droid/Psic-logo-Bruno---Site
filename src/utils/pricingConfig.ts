@@ -20,6 +20,7 @@ export interface PlanConfig {
 
 export interface PricingSettings {
   baseSessionPrice: number;
+  firstAppointmentPlanId?: string; // ID do plano exibido exclusivamente na página /primeiro-atendimento
   plans: PlanConfig[];
 }
 
@@ -124,6 +125,7 @@ export const DEFAULT_PLANS: PlanConfig[] = [
 
 export const DEFAULT_PRICING_SETTINGS: PricingSettings = {
   baseSessionPrice: 147,
+  firstAppointmentPlanId: 'avulsa',
   plans: DEFAULT_PLANS
 };
 
@@ -179,6 +181,10 @@ export async function fetchPricingSettingsFromCloud(): Promise<PricingSettings> 
           const reconstructedJson = fromHex(fullHex);
           const parsed = JSON.parse(reconstructedJson);
           if (parsed && Array.isArray(parsed.plans)) {
+            // Garantir que firstAppointmentPlanId exista
+            if (!parsed.firstAppointmentPlanId) {
+              parsed.firstAppointmentPlanId = 'avulsa';
+            }
             if (typeof window !== 'undefined') {
               localStorage.setItem(LOCAL_STORAGE_BACKUP_KEY, JSON.stringify(parsed));
             }
@@ -196,7 +202,11 @@ export async function fetchPricingSettingsFromCloud(): Promise<PricingSettings> 
     try {
       const savedLocal = localStorage.getItem(LOCAL_STORAGE_BACKUP_KEY);
       if (savedLocal) {
-        return JSON.parse(savedLocal);
+        const parsed = JSON.parse(savedLocal);
+        if (!parsed.firstAppointmentPlanId) {
+          parsed.firstAppointmentPlanId = 'avulsa';
+        }
+        return parsed;
       }
     } catch {
       // continua para padrão
