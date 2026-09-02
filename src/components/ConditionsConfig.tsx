@@ -22,9 +22,13 @@ import {
   Lock, 
   Unlock, 
   AlertCircle,
+  AlertTriangle,
   Copy,
   Download,
-  Upload
+  Upload,
+  Info,
+  ShieldAlert,
+  X
 } from 'lucide-react';
 import { 
   PricingSettings, 
@@ -35,9 +39,15 @@ import {
 } from '../utils/pricingConfig';
 
 export default function ConditionsConfig() {
+  const [initialSettings] = useState<PricingSettings>(getPricingSettings);
   const [settings, setSettings] = useState<PricingSettings>(getPricingSettings);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+  
+  // Estado para o Modal de Alerta de Checkout Kiwify
+  const [showCheckoutWarningModal, setShowCheckoutWarningModal] = useState(false);
+  const [acknowledgedCheckoutSync, setAcknowledgedCheckoutSync] = useState(false);
+  const [copiedLinkKey, setCopiedLinkKey] = useState<string | null>(null);
 
   // Configuração técnica: noindex/nofollow para a página de config
   useEffect(() => {
@@ -51,11 +61,19 @@ export default function ConditionsConfig() {
     window.scrollTo(0, 0);
   }, []);
 
+  const planKeys: (keyof PricingSettings['plans'])[] = ['avulsa', 'mensal', 'bimestral', 'trimestral'];
+
+  // Verificar quais planos tiveram seus preços alterados em relação aos salvos
+  const modifiedPricePlans = planKeys.filter(
+    key => settings.plans[key].finalPrice !== initialSettings.plans[key].finalPrice
+  );
+
+  const hasPriceModifications = modifiedPricePlans.length > 0;
+
   // Atualizar preço base da sessão avulsa e recalcular valores caso solicitado
   const handleBasePriceChange = (newBasePrice: number) => {
     setSettings(prev => {
       const updatedPlans = { ...prev.plans };
-      // Recalcular a consulta avulsa com o novo preço base
       updatedPlans.avulsa = {
         ...updatedPlans.avulsa,
         finalPrice: newBasePrice
@@ -76,7 +94,6 @@ export default function ConditionsConfig() {
       const discountVal = (nominalTotal * discountPercent) / 100;
       const finalPrice = Math.max(0, Math.round(nominalTotal - discountVal));
       
-      // Auto-gerar texto de parcelamento se aplicável
       let autoInstallmentText = plan.installmentText;
       if (plan.installmentsCount > 1) {
         const valParcel = (finalPrice / plan.installmentsCount).toFixed(2).replace('.', ',');
@@ -108,7 +125,6 @@ export default function ConditionsConfig() {
         discountPercent = ((nominalTotal - finalPrice) / nominalTotal) * 100;
       }
 
-      // Auto-gerar texto de parcelamento se aplicável
       let autoInstallmentText = plan.installmentText;
       if (plan.installmentsCount > 1) {
         const valParcel = (finalPrice / plan.installmentsCount).toFixed(2).replace('.', ',');
@@ -139,7 +155,7 @@ export default function ConditionsConfig() {
         const valParcel = (plan.finalPrice / installmentsCount).toFixed(2).replace('.', ',');
         autoInstallmentText = `Em ${installmentsCount}x de R$ ${valParcel}`;
       } else {
-        autoInstallmentText = 'Pagamento único à vista';
+        autoInstallmentText = 'Pagamento único por sessão';
       }
 
       return {
@@ -170,18 +186,36 @@ export default function ConditionsConfig() {
     }));
   };
 
-  // Salvar no localStorage
-  const handleSave = () => {
+  // Copiar link de pagamento
+  const handleCopyLink = (key: string, url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedLinkKey(key);
+    setTimeout(() => setCopiedLinkKey(null), 2500);
+  };
+
+  // Disparar fluxo de salvar (se houver alteração de preço, exibe o alerta explicativo primeiro)
+  const handleSaveClick = () => {
+    if (hasPriceModifications && !acknowledgedCheckoutSync) {
+      setShowCheckoutWarningModal(true);
+      return;
+    }
+    executeSave();
+  };
+
+  // Executar persistência real
+  const executeSave = () => {
     savePricingSettings(settings);
+    setShowCheckoutWarningModal(false);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
+    setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   // Resetar para os padrões
   const handleReset = () => {
-    if (window.confirm('Deseja realmente restaurar todos os preços e configurações para os valores padrão de fábrica?')) {
+    if (window.confirm('Deseja realmente restaurar todos os preços e links de contratação para os valores originais de fábrica?')) {
       const restored = resetPricingSettings();
       setSettings(restored);
+      setAcknowledgedCheckoutSync(false);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3500);
     }
@@ -198,8 +232,6 @@ export default function ConditionsConfig() {
     downloadAnchor.remove();
   };
 
-  const planKeys: (keyof PricingSettings['plans'])[] = ['avulsa', 'mensal', 'bimestral', 'trimestral'];
-
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
       
@@ -213,25 +245,25 @@ export default function ConditionsConfig() {
           <div className="flex items-center gap-3.5">
             <a 
               href="/condicoes-de-atendimento"
-              className="flex items-center gap-1.5 text-xs text-luxury-gold-light hover:text-white transition font-medium mr-2 group bg-black/30 px-3 py-1.5 rounded-full border border-luxury-gold/20"
+              className="flex items-center gap-1.5 text-xs text-luxury-gold-light hover:text-white transition font-medium mr-2 group bg-black/30 px-3.5 py-2 rounded-full border border-luxury-gold/20"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition duration-200" />
               <span>Ver Página de Planos</span>
             </a>
             
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-luxury-gold/10 border border-luxury-gold/30 flex items-center justify-center text-luxury-gold">
+              <div className="w-10 h-10 rounded-xl bg-luxury-gold/10 border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shadow-md">
                 <Settings className="w-5 h-5" />
               </div>
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
-                  <span>Painel de Configuração dos Planos</span>
+                  <span>Configurações de Planos & Checkout</span>
                   <span className="bg-luxury-gold/20 text-luxury-gold text-[10px] px-2 py-0.5 rounded-md font-mono">
-                    Admin
+                    Painel
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  Edição de honorários, cálculo de descontos e links de checkout Kiwify
+                  Edição de honorários, descontos automáticos e links de contratação
                 </p>
               </div>
             </div>
@@ -241,7 +273,7 @@ export default function ConditionsConfig() {
             <button
               onClick={handleReset}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-red-300 text-xs px-3.5 py-2 rounded-xl border border-white/10 hover:border-red-500/30 transition cursor-pointer"
-              title="Restaurar valores padrão"
+              title="Restaurar valores e links padrão"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Restaurar Padrão</span>
@@ -257,7 +289,7 @@ export default function ConditionsConfig() {
             </button>
 
             <button
-              onClick={handleSave}
+              onClick={handleSaveClick}
               className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-lg shadow-luxury-gold/20 hover:brightness-110 active:scale-95 transition cursor-pointer"
             >
               <Save className="w-4 h-4" />
@@ -280,13 +312,158 @@ export default function ConditionsConfig() {
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="text-xs">
               <p className="font-semibold text-white">Configurações Salvas com Sucesso!</p>
-              <p className="text-emerald-300/80">A página de planos foi atualizada em tempo real.</p>
+              <p className="text-emerald-300/80">A página de planos e os links de contratação já estão atualizados.</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* MODAL DE ALERTA DE SINCRONIZAÇÃO DE CHECKOUT KIWIFY */}
+      <AnimatePresence>
+        {showCheckoutWarningModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCheckoutWarningModal(false)}
+              className="fixed inset-0 bg-black/85 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#14120f] to-[#0a0a08] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
+            >
+              {/* Top Accent Line */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-luxury-gold to-amber-600" />
+              
+              <button
+                onClick={() => setShowCheckoutWarningModal(false)}
+                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full bg-black/40 border border-white/5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-start gap-4 mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 shadow-lg">
+                  <AlertTriangle className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-serif text-white font-semibold leading-tight">
+                    Lembrete Importante de Sincronização
+                  </h3>
+                  <p className="text-xs sm:text-sm text-amber-300/90 mt-1">
+                    Você modificou valores no site. Lembre-se de atualizar também na sua plataforma de pagamento (Kiwify)!
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-black/60 border border-amber-500/30 rounded-2xl p-4 sm:p-5 mb-6 space-y-3 text-xs sm:text-sm text-zinc-200">
+                <p className="text-zinc-300 font-light">
+                  Para evitar que o paciente veja um valor na página e encontre outro valor diferente ao clicar no botão de contratação, confirme se os valores nos links de checkout abaixo foram ajustados:
+                </p>
+
+                <div className="space-y-2.5 pt-2">
+                  {modifiedPricePlans.map((key) => {
+                    const plan = settings.plans[key];
+                    const oldPrice = initialSettings.plans[key].finalPrice;
+                    return (
+                      <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#1c1912] border border-amber-500/20 text-xs">
+                        <div>
+                          <span className="font-semibold text-white font-serif">{plan.title}</span>
+                          <span className="text-[11px] text-zinc-400 ml-2 font-mono">
+                            (De R$ {oldPrice},00 ➔ <strong className="text-luxury-gold font-bold">R$ {plan.finalPrice},00</strong>)
+                          </span>
+                        </div>
+                        <a
+                          href={plan.paymentLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/25 px-3 py-1.5 rounded-lg border border-amber-500/30 transition self-start sm:self-auto"
+                        >
+                          <span>Abrir Checkout Kiwify</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Checkbox de Confirmação */}
+              <label 
+                onClick={() => setAcknowledgedCheckoutSync(!acknowledgedCheckoutSync)}
+                className="flex items-start gap-3 p-3.5 rounded-xl bg-black/40 border border-white/10 hover:border-amber-500/30 cursor-pointer select-none mb-6 text-xs text-zinc-200"
+              >
+                <div className="mt-0.5 shrink-0">
+                  {acknowledgedCheckoutSync ? (
+                    <div className="w-5 h-5 rounded-md bg-amber-500 flex items-center justify-center text-black font-bold">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-md border border-zinc-500 bg-black/40 flex items-center justify-center" />
+                  )}
+                </div>
+                <span className="leading-snug">
+                  Estou ciente e irei garantir que os valores e ofertas cadastrados na <strong className="text-amber-300 font-semibold">plataforma de checkout (Kiwify)</strong> coincidam exatamente com os do site.
+                </span>
+              </label>
+
+              {/* Botões do Modal */}
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowCheckoutWarningModal(false)}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 hover:border-white/25 text-xs text-zinc-400 hover:text-white transition font-medium cursor-pointer"
+                >
+                  Voltar para revisar
+                </button>
+                <button
+                  onClick={executeSave}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Confirmar & Salvar no Site</span>
+                </button>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        {/* ALERTA VISUAL NO TOPO SE HOUVER VALORES MODIFICADOS */}
+        {hasPriceModifications && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-950/40 border border-amber-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md"
+          >
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-semibold text-white">
+                  Valores modificados na tabela de planos
+                </h4>
+                <p className="text-[11px] sm:text-xs text-amber-300/80 font-light">
+                  Você alterou o preço de {modifiedPricePlans.length} {modifiedPricePlans.length === 1 ? 'plano' : 'planos'}. Lembre-se de atualizar o checkout na Kiwify antes de divulgar.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSaveClick}
+              className="px-4 py-2 rounded-xl bg-amber-500 text-black font-semibold text-xs uppercase tracking-wider hover:brightness-110 transition shrink-0 cursor-pointer"
+            >
+              Salvar e sincronizar
+            </button>
+          </motion.div>
+        )}
 
         {/* CONTROLE GLOBAL: VALOR BASE DA SESSÃO AVULSA */}
         <section className="bg-gradient-to-r from-luxury-charcoal/90 to-luxury-black border border-luxury-gold/30 rounded-3xl p-6 sm:p-8 mb-10 shadow-2xl relative overflow-hidden backdrop-blur-md">
@@ -333,10 +510,10 @@ export default function ConditionsConfig() {
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-serif text-white font-semibold">
-                Planos de Acompanhamento & Cálculo Automático
+                Planos de Acompanhamento & Links de Contratação
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Altere o percentual de desconto ou digite o preço final desejado — o sistema calcula as variáveis em tempo real.
+                Altere valores, descontos percentuais e os links dos botões de contratação de cada plano.
               </p>
             </div>
 
@@ -365,6 +542,7 @@ export default function ConditionsConfig() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {planKeys.map((key) => {
                 const plan = settings.plans[key];
+                const isPriceEdited = plan.finalPrice !== initialSettings.plans[key].finalPrice;
                 const nominalTotal = settings.baseSessionPrice * plan.sessionsCount;
                 const savingsNominal = Math.max(0, nominalTotal - plan.finalPrice);
                 const pricePerSession = plan.sessionsCount > 0 ? (plan.finalPrice / plan.sessionsCount).toFixed(2).replace('.', ',') : '0,00';
@@ -372,7 +550,9 @@ export default function ConditionsConfig() {
                 return (
                   <div 
                     key={key}
-                    className="bg-gradient-to-b from-luxury-charcoal/90 to-luxury-black border border-luxury-gold/25 rounded-3xl p-6 sm:p-7 shadow-xl flex flex-col justify-between"
+                    className={`bg-gradient-to-b from-luxury-charcoal/90 to-luxury-black border rounded-3xl p-6 sm:p-7 shadow-xl flex flex-col justify-between transition-all duration-300 ${
+                      isPriceEdited ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-luxury-gold/25'
+                    }`}
                   >
                     <div>
                       {/* Top Header */}
@@ -382,9 +562,16 @@ export default function ConditionsConfig() {
                             {plan.sessionsCount}
                           </div>
                           <div>
-                            <h3 className="font-serif text-lg text-white font-semibold capitalize">
-                              {plan.title}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-serif text-lg text-white font-semibold capitalize">
+                                {plan.title}
+                              </h3>
+                              {isPriceEdited && (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-mono uppercase font-bold animate-pulse">
+                                  Valor Editado
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[10px] text-luxury-gold-light font-mono">
                               {plan.sessionsCount === 1 ? '1 atendimento avulso' : `${plan.sessionsCount} atendimentos`}
                             </span>
@@ -467,6 +654,49 @@ export default function ConditionsConfig() {
 
                       </div>
 
+                      {/* Bloco Dedicado: Link de Contratação / Checkout */}
+                      <div className="bg-[#12141c] border border-luxury-gold/30 rounded-2xl p-4 mb-5 shadow-inner">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs font-serif font-semibold text-luxury-gold-light flex items-center gap-1.5">
+                            <LinkIcon className="w-3.5 h-3.5 text-luxury-gold" />
+                            <span>Link de Contratação / Checkout</span>
+                          </label>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleCopyLink(key, plan.paymentLink)}
+                              className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 cursor-pointer"
+                              title="Copiar URL"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>{copiedLinkKey === key ? 'Copiado!' : 'Copiar'}</span>
+                            </button>
+
+                            <a 
+                              href={plan.paymentLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-luxury-gold hover:text-white flex items-center gap-1 text-[10px] bg-luxury-gold/10 hover:bg-luxury-gold/20 px-2.5 py-0.5 rounded-md border border-luxury-gold/30 transition"
+                            >
+                              <span>Testar Checkout</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
+                        </div>
+
+                        <input
+                          type="url"
+                          value={plan.paymentLink}
+                          onChange={(e) => handlePlanFieldChange(key, 'paymentLink', e.target.value)}
+                          className="w-full bg-luxury-black border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-luxury-gold"
+                          placeholder="https://pay.kiwify.com.br/..."
+                        />
+                        <p className="text-[10px] text-zinc-500 font-mono mt-1.5 flex items-center gap-1">
+                          <Info className="w-3 h-3 text-luxury-gold shrink-0" />
+                          <span>Ao clicar no botão deste plano, o paciente é direcionado para esta URL.</span>
+                        </p>
+                      </div>
+
                       {/* Configuração de Parcelamento */}
                       <div className="space-y-3 mb-5">
                         <div className="grid grid-cols-3 gap-3">
@@ -502,34 +732,6 @@ export default function ConditionsConfig() {
                           </div>
                         </div>
 
-                        {/* Link de Checkout Kiwify */}
-                        <div>
-                          <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center justify-between">
-                            <span>Link de Checkout Kiwify</span>
-                            <a 
-                              href={plan.paymentLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-luxury-gold-light hover:text-white flex items-center gap-1 text-[10px]"
-                            >
-                              <span>Testar</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <div className="relative w-full">
-                              <LinkIcon className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                              <input
-                                type="text"
-                                value={plan.paymentLink}
-                                onChange={(e) => handlePlanFieldChange(key, 'paymentLink', e.target.value)}
-                                className="w-full bg-luxury-black border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl pl-8 pr-3 py-2 focus:outline-none focus:border-luxury-gold"
-                                placeholder="https://pay.kiwify.com.br/..."
-                              />
-                            </div>
-                          </div>
-                        </div>
-
                         {/* Descrição Curta */}
                         <div>
                           <label className="text-[10px] font-mono text-zinc-400 block mb-1">
@@ -554,7 +756,7 @@ export default function ConditionsConfig() {
             /* SIMULADOR VISUAL REAL DOS 4 CARDS */
             <div className="bg-luxury-black/60 p-6 rounded-3xl border border-luxury-gold/30">
               <p className="text-xs text-luxury-gold-light font-mono mb-6 text-center">
-                Visualização em tempo real de como os 4 cards aparecerão para os pacientes:
+                Visualização em tempo real de como os 4 cards e botões aparecerão para os pacientes:
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 items-stretch">
@@ -639,14 +841,21 @@ export default function ConditionsConfig() {
         </section>
 
         {/* BOTÃO FIXO/FLUTUANTE NO RODAPÉ PARA SALVAR */}
-        <div className="sticky bottom-6 z-40 max-w-xl mx-auto bg-luxury-charcoal/90 border border-luxury-gold/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4">
+        <div className="sticky bottom-6 z-40 max-w-2xl mx-auto bg-luxury-charcoal/95 border border-luxury-gold/40 p-4 sm:p-5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4">
           <div className="text-xs text-zinc-300">
-            <span className="font-semibold text-white">Deseja aplicar as mudanças?</span>
+            <span className="font-semibold text-white flex items-center gap-1.5">
+              <span>Aplicar alterações no site?</span>
+              {hasPriceModifications && (
+                <span className="text-amber-400 font-mono text-[10px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                  {modifiedPricePlans.length} preços alterados
+                </span>
+              )}
+            </span>
             <p className="text-[10px] text-zinc-400 font-mono">As alterações valem imediatamente para todos os visitantes.</p>
           </div>
 
           <button
-            onClick={handleSave}
+            onClick={handleSaveClick}
             className="flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg shadow-luxury-gold/25 hover:brightness-110 active:scale-95 transition cursor-pointer shrink-0"
           >
             <Save className="w-4 h-4" />
