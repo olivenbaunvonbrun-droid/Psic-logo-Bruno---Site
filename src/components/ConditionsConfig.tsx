@@ -18,7 +18,6 @@ import {
   Calendar, 
   Layers, 
   Sparkles, 
-  CalendarDays, 
   Check, 
   Lock, 
   Unlock, 
@@ -26,9 +25,6 @@ import {
   AlertTriangle,
   Copy,
   Download,
-  Upload,
-  Info,
-  ShieldAlert,
   X,
   LogOut,
   KeyRound,
@@ -38,14 +34,18 @@ import {
   Plus,
   Trash2,
   CopyPlus,
-  ToggleLeft,
-  ToggleRight,
-  TrendingDown,
-  Coins
+  Coins,
+  Shield,
+  Heart,
+  Award,
+  ListPlus,
+  MousePointerClick,
+  Type,
+  FileText
 } from 'lucide-react';
 import { 
   PricingSettings, 
-  DEFAULT_PRICING_SETTINGS,
+  DEFAULT_PRICING_SETTINGS, 
   DEFAULT_PLANS,
   fetchPricingSettingsFromCloud,
   savePricingSettingsToCloud,
@@ -89,7 +89,7 @@ export default function ConditionsConfig() {
   const [acknowledgedCheckoutSync, setAcknowledgedCheckoutSync] = useState(false);
   const [copiedLinkKey, setCopiedLinkKey] = useState<string | null>(null);
 
-  // Configuração técnica: noindex/nofollow e carregamento inicial da nuvem
+  // Carregamento inicial da nuvem
   useEffect(() => {
     let metaRobots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
     if (!metaRobots) {
@@ -100,7 +100,6 @@ export default function ConditionsConfig() {
     metaRobots.content = 'noindex, nofollow';
     window.scrollTo(0, 0);
 
-    // Carregar configurações reais da nuvem
     fetchPricingSettingsFromCloud().then((cloudSettings) => {
       setInitialSettings(cloudSettings);
       setSettings(cloudSettings);
@@ -108,7 +107,7 @@ export default function ConditionsConfig() {
     });
   }, []);
 
-  // Processar tentativa de login
+  // Processar login
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -140,7 +139,7 @@ export default function ConditionsConfig() {
     setLoginError('');
   };
 
-  // Verificar quais planos tiveram seus preços alterados em relação aos salvos
+  // Verificar quais planos tiveram seus preços alterados
   const modifiedPricePlans = settings.plans.filter((plan) => {
     const orig = initialSettings.plans.find((p) => p.id === plan.id);
     return orig && orig.finalPrice !== plan.finalPrice;
@@ -148,7 +147,7 @@ export default function ConditionsConfig() {
 
   const hasPriceModifications = modifiedPricePlans.length > 0;
 
-  // 1. Atualizar Preço Base por Sessão Avulsa e recalcular valores nominais
+  // 1. Atualizar Preço Base por Sessão Avulsa
   const handleBasePriceChange = (newBasePrice: number) => {
     setSettings(prev => ({
       ...prev,
@@ -163,7 +162,6 @@ export default function ConditionsConfig() {
   };
 
   // 2. CÁLCULO AUTOMÁTICO VIA VALOR FINAL DO PLANO (R$)
-  // Ao editar o valor total, calcula o valor por sessão, desconto e parcelas
   const handlePlanFinalPriceChange = (planId: string, newFinalPrice: number) => {
     setSettings(prev => ({
       ...prev,
@@ -198,7 +196,6 @@ export default function ConditionsConfig() {
   };
 
   // 3. CÁLCULO AUTOMÁTICO VIA VALOR DE CONSULTA / POR SESSÃO (R$)
-  // Ao editar o valor por consulta, multiplica pela quantidade de sessões para gerar o valor final total
   const handlePlanPricePerSessionChange = (planId: string, newPricePerSession: number) => {
     setSettings(prev => ({
       ...prev,
@@ -280,9 +277,12 @@ export default function ConditionsConfig() {
             autoInstText = `Em ${p.installmentsCount}x de R$ ${valParcel}`;
           }
 
+          const autoSubtitle = count === 1 ? '1 atendimento individual' : `${count} atendimentos clínicos`;
+
           return {
             ...p,
             sessionsCount: count,
+            sessionsSubtitle: p.sessionsSubtitle || autoSubtitle,
             finalPrice,
             installmentText: autoInstText
           };
@@ -317,6 +317,50 @@ export default function ConditionsConfig() {
     }));
   };
 
+  // 7. GERENCIAMENTO DINÂMICO DA LISTA DE BENEFÍCIOS (FEATURES)
+  const handleAddFeature = (planId: string) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          return {
+            ...p,
+            features: [...(p.features || []), 'Novo benefício clínico']
+          };
+        }
+        return p;
+      })
+    }));
+  };
+
+  const handleUpdateFeature = (planId: string, featureIndex: number, newValue: string) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const updated = [...(p.features || [])];
+          updated[featureIndex] = newValue;
+          return { ...p, features: updated };
+        }
+        return p;
+      })
+    }));
+  };
+
+  const handleRemoveFeature = (planId: string, featureIndex: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const updated = [...(p.features || [])];
+          updated.splice(featureIndex, 1);
+          return { ...p, features: updated };
+        }
+        return p;
+      })
+    }));
+  };
+
   // Alternar Ativação / Inativação de um plano
   const handleTogglePlanActive = (planId: string) => {
     setSettings(prev => ({
@@ -333,34 +377,31 @@ export default function ConditionsConfig() {
   // Adicionar Novo Plano Customizado
   const handleAddNewPlan = () => {
     const customCount = settings.plans.filter(p => p.isCustom).length;
-    if (customCount >= 2) {
-      alert('Você já possui 2 planos customizados adicionados. Edite ou exclua um deles para adicionar outro.');
-      return;
-    }
-
-    const newId = `custom_p${customCount === 0 ? '4' : '5'}`;
-    const sessions = customCount === 0 ? 24 : 6;
-    const finalPrice = customCount === 0 ? 1800 : 500;
-    const instCount = customCount === 0 ? 6 : 2;
+    const newId = `custom_p_${Date.now()}`;
+    const sessions = 16;
+    const finalPrice = 1400;
+    const instCount = 4;
     const valParcel = (finalPrice / instCount).toFixed(2).replace('.', ',');
 
     const newPlan: PlanConfig = {
       id: newId,
-      title: customCount === 0 ? 'Acompanhamento Semestral' : 'Plano Intensivo',
+      title: customCount === 0 ? 'Acompanhamento Semestral' : 'Plano Intensivo Personalizado',
       badge: 'Personalizado',
+      iconName: 'sparkles',
+      periodLabel: '120 dias',
       sessionsCount: sessions,
-      periodDays: customCount === 0 ? 180 : 45,
-      periodLabel: customCount === 0 ? '180 dias' : '45 dias',
-      discountPercent: 30,
+      sessionsSubtitle: '16 atendimentos clínicos estruturados',
+      discountPercent: 35,
       finalPrice: finalPrice,
       installmentsCount: instCount,
       installmentText: `Em ${instCount}x de R$ ${valParcel}`,
       paymentLink: 'https://pay.kiwify.com.br/',
-      description: 'Modalidade estruturada de acompanhamento clínico com suporte continuado.',
+      buttonText: 'Formalizar modalidade personalizada',
+      description: 'Modalidade estruturada de acompanhamento clínico continuado com plano terapêutico personalizado.',
       features: [
         'Atendimentos clínicos dedicados',
         'Plano de intervenção estruturado',
-        'Emissão de recibos mensais para reembolso',
+        'Emissão de recibos mensais oficiais',
         'Suporte direto via WhatsApp'
       ],
       active: true,
@@ -375,20 +416,15 @@ export default function ConditionsConfig() {
 
   // Duplicar um plano existente
   const handleDuplicatePlan = (plan: PlanConfig) => {
-    const customCount = settings.plans.filter(p => p.isCustom).length;
-    if (customCount >= 2) {
-      alert('Limite máximo de planos extras atingido (2 planos customizados). Exclua um plano extra antes de duplicar.');
-      return;
-    }
-
-    const newId = `custom_p${customCount === 0 ? '4' : '5'}`;
+    const newId = `custom_p_${Date.now()}`;
     const duplicatedPlan: PlanConfig = {
       ...plan,
       id: newId,
       title: `${plan.title} (Cópia)`,
-      badge: plan.badge || 'Cópia',
+      badge: plan.badge ? `${plan.badge}` : 'Cópia',
       isCustom: true,
-      active: true
+      active: true,
+      features: [...(plan.features || [])]
     };
 
     setSettings(prev => ({
@@ -419,7 +455,7 @@ export default function ConditionsConfig() {
     }
   };
 
-  // Atualizar campo genérico de um plano (texto, link, badge, etc.)
+  // Atualizar campo de texto genérico de um plano
   const handlePlanFieldChange = (planId: string, field: keyof PlanConfig, value: any) => {
     setSettings(prev => ({
       ...prev,
@@ -448,7 +484,7 @@ export default function ConditionsConfig() {
     executeSave();
   };
 
-  // Executar persistência real na Nuvem Compartilhada Global
+  // Executar persistência real na Nuvem
   const executeSave = async () => {
     setIsSavingCloud(true);
     const success = await savePricingSettingsToCloud(settings);
@@ -459,14 +495,12 @@ export default function ConditionsConfig() {
       setShowCheckoutWarningModal(false);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 4500);
-    } else {
-      alert('Erro ao sincronizar com a nuvem. Verifique sua conexão com a internet.');
     }
   };
 
   // Resetar para os padrões na nuvem
   const handleReset = async () => {
-    if (window.confirm('Deseja realmente restaurar todos os planos originais e links de contratação na nuvem?')) {
+    if (window.confirm('Deseja realmente restaurar todos os planos originais e textos de fábrica na nuvem?')) {
       setIsSavingCloud(true);
       const restored = await resetPricingSettingsInCloud();
       setSettings(restored);
@@ -489,6 +523,20 @@ export default function ConditionsConfig() {
     downloadAnchor.remove();
   };
 
+  // Renderizar ícone correto
+  const renderPlanIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'user': return <User className="w-4 h-4" />;
+      case 'calendar': return <Calendar className="w-4 h-4" />;
+      case 'layers': return <Layers className="w-4 h-4" />;
+      case 'shield': return <Shield className="w-4 h-4" />;
+      case 'heart': return <Heart className="w-4 h-4" />;
+      case 'award': return <Award className="w-4 h-4" />;
+      case 'sparkles':
+      default: return <Sparkles className="w-4 h-4" />;
+    }
+  };
+
   // =========================================================================
   // TELA 1: LOGIN DE ACESSO ADMINISTRATIVO
   // =========================================================================
@@ -502,10 +550,8 @@ export default function ConditionsConfig() {
 
         <div className="relative z-10 w-full max-w-md">
           
-          {/* Card de Login */}
           <div className="bg-gradient-to-b from-luxury-charcoal/95 to-luxury-black/95 border border-luxury-gold/30 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md">
             
-            {/* Logo e Cabeçalho */}
             <div className="text-center mb-8">
               <div className="mx-auto w-16 h-16 rounded-full border border-luxury-gold/40 flex items-center justify-center bg-[#07090f] overflow-hidden mb-4 shadow-xl">
                 <img 
@@ -519,14 +565,12 @@ export default function ConditionsConfig() {
                 Painel Administrativo
               </h2>
               <p className="text-xs text-luxury-gold-light font-mono mt-1">
-                Acesso restrito às configurações globais de honorários
+                Acesso restrito às configurações completas de planos
               </p>
             </div>
 
-            {/* Formulário */}
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               
-              {/* Campo Email */}
               <div>
                 <label className="text-[11px] font-mono text-zinc-300 block mb-1.5 uppercase">
                   Email de Acesso
@@ -544,7 +588,6 @@ export default function ConditionsConfig() {
                 </div>
               </div>
 
-              {/* Campo Senha */}
               <div>
                 <label className="text-[11px] font-mono text-zinc-300 block mb-1.5 uppercase">
                   Senha
@@ -570,7 +613,6 @@ export default function ConditionsConfig() {
                 </div>
               </div>
 
-              {/* Alerta de Erro */}
               {loginError && (
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
@@ -582,7 +624,6 @@ export default function ConditionsConfig() {
                 </motion.div>
               )}
 
-              {/* Botão Entrar */}
               <button
                 type="submit"
                 disabled={isSubmittingLogin}
@@ -593,14 +634,13 @@ export default function ConditionsConfig() {
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Acessar Configurações</span>
+                    <span>Acessar Painel</span>
                   </>
                 )}
               </button>
 
             </form>
 
-            {/* Link Voltar */}
             <div className="mt-6 pt-5 border-t border-white/10 text-center">
               <a
                 href="/condicoes-de-atendimento"
@@ -624,7 +664,7 @@ export default function ConditionsConfig() {
   }
 
   // =========================================================================
-  // TELA 2: PAINEL DE CONFIGURAÇÕES AUTENTICADO
+  // TELA 2: PAINEL DE CONFIGURAÇÕES AUTENTICADO COM EDIÇÃO COMPLETA
   // =========================================================================
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
@@ -651,14 +691,14 @@ export default function ConditionsConfig() {
               </div>
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
-                  <span>Gestão de Planos & Honorários</span>
+                  <span>Gestão Completa de Planos & Honorários</span>
                   <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30 flex items-center gap-1">
                     <Globe className="w-3 h-3" />
-                    <span>Nuvem Global</span>
+                    <span>Nuvem Ativa</span>
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  {settings.plans.filter(p => p.active).length} planos ativos no site • Cálculos bidirecionais automáticos
+                  {settings.plans.filter(p => p.active).length} planos ativos • 100% dos textos e itens customizáveis
                 </p>
               </div>
             </div>
@@ -667,7 +707,6 @@ export default function ConditionsConfig() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAddNewPlan}
-              disabled={settings.plans.filter(p => p.isCustom).length >= 2}
               className="flex items-center gap-1.5 bg-luxury-gold/15 hover:bg-luxury-gold/25 text-luxury-gold hover:text-white border border-luxury-gold/40 text-xs px-3.5 py-2 rounded-xl transition cursor-pointer"
               title="Adicionar novo plano customizado"
             >
@@ -679,7 +718,7 @@ export default function ConditionsConfig() {
               onClick={handleReset}
               disabled={isSavingCloud}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-red-300 text-xs px-3.5 py-2 rounded-xl border border-white/10 hover:border-red-500/30 transition cursor-pointer"
-              title="Restaurar valores e links padrão"
+              title="Restaurar textos e valores de fábrica"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Restaurar Padrão</span>
@@ -688,7 +727,7 @@ export default function ConditionsConfig() {
             <button
               onClick={handleExportJson}
               className="flex items-center gap-1.5 text-zinc-300 hover:text-luxury-gold text-xs px-3.5 py-2 rounded-xl border border-luxury-gold/20 hover:border-luxury-gold/40 transition cursor-pointer"
-              title="Baixar backup das configurações"
+              title="Baixar backup JSON"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Exportar JSON</span>
@@ -715,7 +754,7 @@ export default function ConditionsConfig() {
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-red-400 bg-red-950/30 hover:bg-red-950/60 border border-red-500/30 px-3.5 py-2 rounded-xl text-xs transition cursor-pointer ml-1"
-              title="Encerrar sessão de configuração"
+              title="Encerrar sessão"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Sair</span>
@@ -737,7 +776,7 @@ export default function ConditionsConfig() {
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <div className="text-xs">
               <p className="font-semibold text-white">Configurações Salvas na Nuvem!</p>
-              <p className="text-emerald-300/80">A página de planos foi atualizada instantaneamente para todos os visitantes.</p>
+              <p className="text-emerald-300/80">Todos os textos, valores e benefícios foram atualizados para todos os visitantes.</p>
             </div>
           </motion.div>
         )}
@@ -761,7 +800,6 @@ export default function ConditionsConfig() {
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
               className="relative w-full max-w-2xl bg-gradient-to-b from-[#1e1b14] via-[#101218] to-[#0a0b0f] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-left"
             >
-              {/* Top Accent Line */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-luxury-gold to-amber-600" />
               
               <button
@@ -817,7 +855,6 @@ export default function ConditionsConfig() {
                 </div>
               </div>
 
-              {/* Checkbox de Confirmação */}
               <label 
                 onClick={() => setAcknowledgedCheckoutSync(!acknowledgedCheckoutSync)}
                 className="flex items-start gap-3 p-3.5 rounded-xl bg-black/40 border border-white/10 hover:border-amber-500/30 cursor-pointer select-none mb-6 text-xs text-zinc-200"
@@ -836,7 +873,6 @@ export default function ConditionsConfig() {
                 </span>
               </label>
 
-              {/* Botões do Modal */}
               <div className="flex flex-col sm:flex-row items-center justify-end gap-3">
                 <button
                   onClick={() => setShowCheckoutWarningModal(false)}
@@ -914,7 +950,7 @@ export default function ConditionsConfig() {
                 Honorário Base por Sessão Avulsa
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 font-light mt-1 leading-relaxed">
-                Valor padrão por atendimento de 50 min. Ao editar os cards abaixo, você pode ajustar tanto pelo <strong className="text-luxury-gold-light">valor total do plano</strong> quanto pelo <strong className="text-luxury-gold-light">valor por consulta</strong> com recálculo automático instantâneo.
+                Valor de referência por atendimento individual de 50 min. Todos os campos dos cards abaixo são totalmente personalizáveis e contam com recálculo automático bidirecional.
               </p>
             </div>
 
@@ -941,7 +977,7 @@ export default function ConditionsConfig() {
           </div>
         </section>
 
-        {/* EDITOR DOS PLANOS (CARDS DE CONFIGURAÇÃO BIDIRECIONAL) */}
+        {/* EDITOR DOS PLANOS (CARDS DE CONFIGURAÇÃO COM EDIÇÃO TOTAL) */}
         <section className="mb-14">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
@@ -949,14 +985,13 @@ export default function ConditionsConfig() {
                 Gestão de Planos ({settings.plans.length} cadastrados)
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Edite pelo valor total ou pelo valor por consulta — todos os campos e parcelas se calculam automaticamente.
+                Edite títulos, badges, períodos, ícones, subtítulos, preços, benefícios (features), botões de ação e links.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAddNewPlan}
-                disabled={settings.plans.filter(p => p.isCustom).length >= 2}
                 className="flex items-center gap-1.5 bg-luxury-gold/20 hover:bg-luxury-gold/30 text-luxury-gold-light hover:text-white border border-luxury-gold/40 text-xs px-3.5 py-2 rounded-xl transition cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
@@ -986,7 +1021,7 @@ export default function ConditionsConfig() {
           </div>
 
           {activeTab === 'editor' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
               {settings.plans.map((plan) => {
                 const orig = initialSettings.plans.find(p => p.id === plan.id);
                 const isPriceEdited = orig && orig.finalPrice !== plan.finalPrice;
@@ -998,17 +1033,17 @@ export default function ConditionsConfig() {
                 return (
                   <div 
                     key={plan.id}
-                    className={`bg-gradient-to-b from-luxury-charcoal/90 to-luxury-black border rounded-3xl p-6 sm:p-7 shadow-xl flex flex-col justify-between transition-all duration-300 ${
+                    className={`bg-gradient-to-b from-luxury-charcoal/95 to-luxury-black border rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col justify-between transition-all duration-300 ${
                       !plan.active 
                         ? 'opacity-60 border-zinc-700/50 bg-black/40' 
                         : isPriceEdited 
-                          ? 'border-amber-500/50 ring-1 ring-amber-500/20' 
-                          : 'border-luxury-gold/25'
+                          ? 'border-amber-500/60 ring-1 ring-amber-500/30' 
+                          : 'border-luxury-gold/30'
                     }`}
                   >
                     <div>
                       {/* Top Header com Status Ativo/Inativo e Botões de Ação */}
-                      <div className="flex items-center justify-between border-b border-luxury-gold/15 pb-4 mb-5 flex-wrap gap-2">
+                      <div className="flex items-center justify-between border-b border-luxury-gold/20 pb-4 mb-5 flex-wrap gap-2">
                         <div className="flex items-center gap-2.5">
                           <button
                             onClick={() => handleTogglePlanActive(plan.id)}
@@ -1040,67 +1075,119 @@ export default function ConditionsConfig() {
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleDuplicatePlan(plan)}
-                            className="p-1.5 text-zinc-400 hover:text-luxury-gold bg-black/40 hover:bg-black/80 rounded-lg border border-white/5 transition cursor-pointer"
+                            className="p-2 text-zinc-400 hover:text-luxury-gold bg-black/40 hover:bg-black/80 rounded-xl border border-white/5 transition cursor-pointer"
                             title="Duplicar este plano"
                           >
-                            <CopyPlus className="w-3.5 h-3.5" />
+                            <CopyPlus className="w-4 h-4" />
                           </button>
 
                           <button
                             onClick={() => handleDeletePlan(plan.id)}
-                            className="p-1.5 text-zinc-400 hover:text-red-400 bg-black/40 hover:bg-red-950/40 rounded-lg border border-white/5 hover:border-red-500/30 transition cursor-pointer"
+                            className="p-2 text-zinc-400 hover:text-red-400 bg-black/40 hover:bg-red-950/40 rounded-xl border border-white/5 hover:border-red-500/30 transition cursor-pointer"
                             title={plan.isCustom ? "Excluir plano definitivamente" : "Inativar plano"}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
 
-                      {/* Título e Badge */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                            Título do Plano
-                          </label>
-                          <input
-                            type="text"
-                            value={plan.title}
-                            onChange={(e) => handlePlanFieldChange(plan.id, 'title', e.target.value)}
-                            className="w-full bg-black/60 border border-luxury-gold/30 text-white font-serif text-base font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
-                            placeholder="Nome da modalidade"
-                          />
+                      {/* 1. SEÇÃO DE CABEÇALHO DO CARD (TÍTULO, BADGE, PERÍODO, ÍCONE) */}
+                      <div className="bg-luxury-black/50 p-4 rounded-2xl border border-white/5 mb-5 space-y-3.5">
+                        <div className="text-[11px] font-serif font-semibold text-luxury-gold flex items-center gap-1.5">
+                          <Type className="w-3.5 h-3.5" />
+                          <span>Identificação & Cabeçalho do Card</span>
                         </div>
 
-                        <div>
-                          <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                            Badge Superior
-                          </label>
-                          <input
-                            type="text"
-                            value={plan.badge}
-                            onChange={(e) => handlePlanFieldChange(plan.id, 'badge', e.target.value)}
-                            placeholder="Ex: Semanal"
-                            className="w-full bg-black/60 border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2 text-center focus:outline-none focus:border-luxury-gold"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="sm:col-span-2">
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Título do Plano
+                            </label>
+                            <input
+                              type="text"
+                              value={plan.title}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'title', e.target.value)}
+                              className="w-full bg-black/60 border border-luxury-gold/30 text-white font-serif text-base font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                              placeholder="Nome da modalidade"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Badge Superior
+                            </label>
+                            <input
+                              type="text"
+                              value={plan.badge}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'badge', e.target.value)}
+                              placeholder="Ex: Semanal"
+                              className="w-full bg-black/60 border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2 text-center focus:outline-none focus:border-luxury-gold"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-luxury-gold" />
+                              <span>Duração / Período</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={plan.periodLabel}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'periodLabel', e.target.value)}
+                              placeholder="Ex: 50 min ou 30 dias"
+                              className="w-full bg-black/60 border border-luxury-gold/30 text-zinc-200 text-xs font-mono rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Ícone do Card
+                            </label>
+                            <select
+                              value={plan.iconName || 'sparkles'}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'iconName', e.target.value)}
+                              className="w-full bg-black/60 border border-luxury-gold/30 text-zinc-200 text-xs font-mono rounded-xl px-2.5 py-2 focus:outline-none focus:border-luxury-gold cursor-pointer"
+                            >
+                              <option value="user">👤 Individual / Consulta</option>
+                              <option value="calendar">📅 Calendário / Mensal</option>
+                              <option value="layers">🗂️ Camadas / Bimestral</option>
+                              <option value="sparkles">✨ Brilho / Destaque</option>
+                              <option value="shield">🛡️ Proteção / Escuta</option>
+                              <option value="heart">❤️ Vínculo / Cuidado</option>
+                              <option value="award">🏆 Especial / Completo</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Subtítulo do Card
+                            </label>
+                            <input
+                              type="text"
+                              value={plan.sessionsSubtitle || ''}
+                              onChange={(e) => handlePlanFieldChange(plan.id, 'sessionsSubtitle', e.target.value)}
+                              placeholder="Ex: 4 atendimentos"
+                              className="w-full bg-black/60 border border-luxury-gold/30 text-zinc-200 text-xs font-mono rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            />
+                          </div>
                         </div>
                       </div>
 
-                      {/* BLOCO DE CÁLCULO BIDIRECIONAL: VALOR TOTAL E VALOR POR CONSULTA */}
+                      {/* 2. BLOCO DE CÁLCULO BIDIRECIONAL DE PREÇOS */}
                       <div className="bg-luxury-black/70 p-4 rounded-2xl border border-luxury-gold/25 mb-5 space-y-4 shadow-inner">
-                        
                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
                           <span className="text-[11px] font-serif font-semibold text-luxury-gold flex items-center gap-1.5">
                             <Calculator className="w-3.5 h-3.5" />
-                            <span>Cálculo Automático de Honorários</span>
+                            <span>Honorários & Cálculo Automático</span>
                           </span>
                           <span className="text-[10px] text-zinc-400 font-mono">
-                            Altere qualquer campo
+                            Recálculo bidirecional instantâneo
                           </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          
-                          {/* 1. VALOR TOTAL DO PLANO */}
                           <div>
                             <label className="text-[10px] uppercase font-mono text-luxury-gold-light block mb-1 font-semibold flex items-center gap-1">
                               <Coins className="w-3 h-3 text-luxury-gold" />
@@ -1118,12 +1205,8 @@ export default function ConditionsConfig() {
                               />
                               <span className="text-xs text-zinc-400 font-mono">,00</span>
                             </div>
-                            <span className="text-[9px] text-zinc-400 font-mono mt-0.5 block">
-                              Valor final cobrado no plano
-                            </span>
                           </div>
 
-                          {/* 2. VALOR POR CONSULTA / SESSÃO (EDITÁVEL!) */}
                           <div>
                             <label className="text-[10px] uppercase font-mono text-emerald-300 block mb-1 font-semibold flex items-center gap-1">
                               <User className="w-3 h-3 text-emerald-400" />
@@ -1140,17 +1223,10 @@ export default function ConditionsConfig() {
                                 className="w-full bg-luxury-charcoal border border-emerald-500/40 text-emerald-200 font-serif text-xl font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-400"
                               />
                             </div>
-                            <span className="text-[9px] text-zinc-400 font-mono mt-0.5 block">
-                              {sessions}x consultas = R$ {plan.finalPrice},00
-                            </span>
                           </div>
-
                         </div>
 
-                        {/* Controles de Sessões, Desconto % e Parcelas */}
                         <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/5">
-                          
-                          {/* Qtd Sessões */}
                           <div>
                             <label className="text-[10px] font-mono text-zinc-400 block mb-1">
                               Qtd. Sessões
@@ -1165,31 +1241,27 @@ export default function ConditionsConfig() {
                             />
                           </div>
 
-                          {/* Desconto % */}
                           <div>
                             <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center gap-0.5">
                               <span>Desconto</span>
                               <Percent className="w-2.5 h-2.5 text-luxury-gold" />
                             </label>
-                            <div className="flex items-center gap-1">
-                              <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                step="0.1"
-                                disabled={plan.sessionsCount === 1}
-                                value={plan.discountPercent || 0}
-                                onChange={(e) => handlePlanDiscountPercentChange(plan.id, Number(e.target.value) || 0)}
-                                className={`w-full bg-luxury-charcoal border text-white text-xs font-mono rounded-xl px-2.5 py-2 text-center focus:outline-none ${
-                                  plan.sessionsCount === 1 
-                                    ? 'border-white/10 text-zinc-500 cursor-not-allowed' 
-                                    : 'border-luxury-gold/30 focus:border-luxury-gold'
-                                }`}
-                              />
-                            </div>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.1"
+                              disabled={plan.sessionsCount === 1}
+                              value={plan.discountPercent || 0}
+                              onChange={(e) => handlePlanDiscountPercentChange(plan.id, Number(e.target.value) || 0)}
+                              className={`w-full bg-luxury-charcoal border text-white text-xs font-mono rounded-xl px-2.5 py-2 text-center focus:outline-none ${
+                                plan.sessionsCount === 1 
+                                  ? 'border-white/10 text-zinc-500 cursor-not-allowed' 
+                                  : 'border-luxury-gold/30 focus:border-luxury-gold'
+                              }`}
+                            />
                           </div>
 
-                          {/* Parcelamento */}
                           <div>
                             <label className="text-[10px] font-mono text-zinc-400 block mb-1">
                               Parcelas
@@ -1207,10 +1279,8 @@ export default function ConditionsConfig() {
                               <option value="12">12x</option>
                             </select>
                           </div>
-
                         </div>
 
-                        {/* Régua de Métricas Automáticas em Tempo Real */}
                         <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-2 text-center">
                           <div className="bg-black/40 p-2 rounded-xl border border-white/5">
                             <span className="text-[9px] text-zinc-500 font-mono uppercase block">Valor Integral</span>
@@ -1226,7 +1296,6 @@ export default function ConditionsConfig() {
                           </div>
                         </div>
 
-                        {/* Texto de Parcelamento Exibido no Card */}
                         <div>
                           <label className="text-[10px] font-mono text-zinc-400 block mb-1">
                             Texto de Parcelamento (Exibido no Card)
@@ -1239,59 +1308,117 @@ export default function ConditionsConfig() {
                             placeholder="Ex: Em 2x de R$ 210,00"
                           />
                         </div>
-
                       </div>
 
-                      {/* Bloco Dedicado: Link de Contratação / Checkout */}
-                      <div className="bg-[#12141c] border border-luxury-gold/30 rounded-2xl p-4 mb-5 shadow-inner">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-serif font-semibold text-luxury-gold-light flex items-center gap-1.5">
-                            <LinkIcon className="w-3.5 h-3.5 text-luxury-gold" />
-                            <span>Link de Checkout (Kiwify)</span>
-                          </label>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleCopyLink(plan.id, plan.paymentLink)}
-                              className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 cursor-pointer"
-                              title="Copiar URL"
-                            >
-                              <Copy className="w-2.5 h-2.5" />
-                              <span>{copiedLinkKey === plan.id ? 'Copiado!' : 'Copiar'}</span>
-                            </button>
-
-                            <a 
-                              href={plan.paymentLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-luxury-gold hover:text-white flex items-center gap-1 text-[10px] bg-luxury-gold/10 hover:bg-luxury-gold/20 px-2.5 py-0.5 rounded-md border border-luxury-gold/30 transition"
-                            >
-                              <span>Testar</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          </div>
-                        </div>
-
-                        <input
-                          type="url"
-                          value={plan.paymentLink}
-                          onChange={(e) => handlePlanFieldChange(plan.id, 'paymentLink', e.target.value)}
-                          className="w-full bg-luxury-black border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-luxury-gold"
-                          placeholder="https://pay.kiwify.com.br/..."
-                        />
-                      </div>
-
-                      {/* Descrição */}
-                      <div>
-                        <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                          Descrição Curta
+                      {/* 3. DESCRIÇÃO CLÍNICA */}
+                      <div className="mb-5">
+                        <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-luxury-gold" />
+                          <span>Descrição Clínica do Card</span>
                         </label>
                         <textarea
                           rows={2}
                           value={plan.description}
                           onChange={(e) => handlePlanFieldChange(plan.id, 'description', e.target.value)}
-                          className="w-full bg-luxury-black border border-luxury-gold/30 text-zinc-300 text-xs font-light rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold resize-none"
+                          className="w-full bg-luxury-black border border-luxury-gold/30 text-zinc-200 text-xs font-light rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-luxury-gold resize-none leading-relaxed"
+                          placeholder="Texto descritivo com linguagem ética..."
                         />
+                      </div>
+
+                      {/* 4. LISTA DE BENEFÍCIOS / FEATURES (ADICIONAR, EDITAR, EXCLUIR) */}
+                      <div className="bg-luxury-black/60 p-4 rounded-2xl border border-luxury-gold/25 mb-5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-serif font-semibold text-luxury-gold flex items-center gap-1.5">
+                            <ListPlus className="w-3.5 h-3.5" />
+                            <span>Itens com Check / Benefícios ({plan.features?.length || 0})</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleAddFeature(plan.id)}
+                            className="text-[10px] text-luxury-gold-light hover:text-white bg-luxury-gold/10 hover:bg-luxury-gold/20 border border-luxury-gold/30 px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Adicionar Item</span>
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          {(plan.features || []).map((feat, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                              <input
+                                type="text"
+                                value={feat}
+                                onChange={(e) => handleUpdateFeature(plan.id, idx, e.target.value)}
+                                className="w-full bg-luxury-charcoal border border-white/10 text-zinc-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-luxury-gold"
+                                placeholder="Descrição do benefício..."
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFeature(plan.id, idx)}
+                                className="p-1.5 text-zinc-500 hover:text-red-400 transition cursor-pointer shrink-0"
+                                title="Remover item"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 5. TEXTO DO BOTÃO (CTA) E LINK DE CHECKOUT KIWIFY */}
+                      <div className="bg-[#12141c] border border-luxury-gold/30 rounded-2xl p-4 mb-2 shadow-inner space-y-3">
+                        <div>
+                          <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center gap-1">
+                            <MousePointerClick className="w-3.5 h-3.5 text-luxury-gold" />
+                            <span>Texto do Botão de Formalização (CTA)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={plan.buttonText || `Formalizar ${plan.title.toLowerCase()}`}
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'buttonText', e.target.value)}
+                            className="w-full bg-black/60 border border-luxury-gold/30 text-white text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            placeholder="Ex: Formalizar consulta avulsa"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                              <LinkIcon className="w-3 h-3 text-luxury-gold" />
+                              <span>Link de Checkout (Kiwify)</span>
+                            </label>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleCopyLink(plan.id, plan.paymentLink)}
+                                className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 cursor-pointer"
+                                title="Copiar URL"
+                              >
+                                <Copy className="w-2.5 h-2.5" />
+                                <span>{copiedLinkKey === plan.id ? 'Copiado!' : 'Copiar'}</span>
+                              </button>
+
+                              <a 
+                                href={plan.paymentLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-luxury-gold hover:text-white flex items-center gap-1 text-[10px] bg-luxury-gold/10 hover:bg-luxury-gold/20 px-2 py-0.5 rounded-md border border-luxury-gold/30 transition"
+                              >
+                                <span>Testar</span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            </div>
+                          </div>
+
+                          <input
+                            type="url"
+                            value={plan.paymentLink}
+                            onChange={(e) => handlePlanFieldChange(plan.id, 'paymentLink', e.target.value)}
+                            className="w-full bg-luxury-black border border-luxury-gold/30 text-luxury-gold-light text-xs font-mono rounded-xl px-3 py-2 focus:outline-none focus:border-luxury-gold"
+                            placeholder="https://pay.kiwify.com.br/..."
+                          />
+                        </div>
                       </div>
 
                     </div>
@@ -1323,14 +1450,14 @@ export default function ConditionsConfig() {
 
                           <div className="flex items-center gap-2.5 mb-2.5">
                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0">
-                              <Sparkles className="w-4 h-4" />
+                              {renderPlanIcon(plan.iconName)}
                             </div>
                             <div>
                               <h3 className="text-lg font-serif text-white font-semibold leading-tight">
                                 {plan.title}
                               </h3>
                               <p className="text-[10px] text-zinc-400 font-mono">
-                                {plan.sessionsCount === 1 ? '1 atendimento' : `${plan.sessionsCount} atendimentos`}
+                                {plan.sessionsSubtitle || (plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`)}
                               </p>
                             </div>
                           </div>
@@ -1354,7 +1481,7 @@ export default function ConditionsConfig() {
                           </p>
 
                           <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                            {plan.features.map((feat, idx) => (
+                            {(plan.features || []).map((feat, idx) => (
                               <li key={idx} className="flex items-center gap-2">
                                 <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
                                 <span>{feat}</span>
@@ -1369,7 +1496,7 @@ export default function ConditionsConfig() {
                             className="w-full flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl text-[11px] uppercase tracking-wider font-semibold bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 cursor-pointer"
                           >
                             <Unlock className="w-3.5 h-3.5" />
-                            <span>Formalizar {plan.title}</span>
+                            <span>{plan.buttonText || `Formalizar ${plan.title}`}</span>
                             <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                           </button>
                         </div>
@@ -1394,7 +1521,7 @@ export default function ConditionsConfig() {
                 </span>
               )}
             </span>
-            <p className="text-[10px] text-zinc-400 font-mono">Planos inativos serão imediatamente ocultados do público.</p>
+            <p className="text-[10px] text-zinc-400 font-mono">Todos os textos, benefícios e valores serão atualizados globalmente.</p>
           </div>
 
           <button

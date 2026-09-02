@@ -406,18 +406,20 @@ export default function ConditionsAndFees() {
                     {/* Icon & Title */}
                     <div className="flex items-center gap-2.5 mb-2.5">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-luxury-charcoal to-[#0b0c10] border border-luxury-gold/30 flex items-center justify-center text-luxury-gold shrink-0 shadow-md group-hover:scale-105 transition duration-300">
-                        {plan.id === 'avulsa' && <User className="w-4 h-4" />}
-                        {plan.id === 'mensal' && <Calendar className="w-4 h-4" />}
-                        {plan.id === 'bimestral' && <Layers className="w-4 h-4" />}
-                        {plan.id === 'trimestral' && <Sparkles className="w-4 h-4" />}
-                        {plan.isCustom && <Sparkles className="w-4 h-4 text-purple-300" />}
+                        {plan.iconName === 'user' && <User className="w-4 h-4" />}
+                        {plan.iconName === 'calendar' && <Calendar className="w-4 h-4" />}
+                        {plan.iconName === 'layers' && <Layers className="w-4 h-4" />}
+                        {plan.iconName === 'shield' && <Shield className="w-4 h-4" />}
+                        {plan.iconName === 'heart' && <HeartHandshake className="w-4 h-4" />}
+                        {plan.iconName === 'award' && <Sparkles className="w-4 h-4 text-luxury-gold-light" />}
+                        {(!plan.iconName || plan.iconName === 'sparkles') && <Sparkles className="w-4 h-4" />}
                       </div>
                       <div>
                         <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
                           {plan.title}
                         </h3>
                         <p className="text-[10px] text-zinc-400 font-mono">
-                          {plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`}
+                          {plan.sessionsSubtitle || (plan.sessionsCount === 1 ? '1 atendimento individual' : `${plan.sessionsCount} atendimentos`)}
                         </p>
                       </div>
                     </div>
@@ -465,7 +467,7 @@ export default function ConditionsAndFees() {
                       }`}
                     >
                       {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                      <span>Formalizar {plan.title.toLowerCase()}</span>
+                      <span>{plan.buttonText || `Formalizar ${plan.title.toLowerCase()}`}</span>
                       <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                     </button>
                     {!isAllChecked && (
