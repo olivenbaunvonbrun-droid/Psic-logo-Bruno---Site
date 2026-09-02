@@ -39,7 +39,9 @@ import {
   Trash2,
   CopyPlus,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  TrendingDown,
+  Coins
 } from 'lucide-react';
 import { 
   PricingSettings, 
@@ -146,12 +148,172 @@ export default function ConditionsConfig() {
 
   const hasPriceModifications = modifiedPricePlans.length > 0;
 
-  // Atualizar preço base da sessão avulsa
+  // 1. Atualizar Preço Base por Sessão Avulsa e recalcular valores nominais
   const handleBasePriceChange = (newBasePrice: number) => {
     setSettings(prev => ({
       ...prev,
       baseSessionPrice: newBasePrice,
-      plans: prev.plans.map(p => p.id === 'avulsa' ? { ...p, finalPrice: newBasePrice } : p)
+      plans: prev.plans.map(p => {
+        if (p.id === 'avulsa') {
+          return { ...p, finalPrice: newBasePrice };
+        }
+        return p;
+      })
+    }));
+  };
+
+  // 2. CÁLCULO AUTOMÁTICO VIA VALOR FINAL DO PLANO (R$)
+  // Ao editar o valor total, calcula o valor por sessão, desconto e parcelas
+  const handlePlanFinalPriceChange = (planId: string, newFinalPrice: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const sessions = Math.max(1, p.sessionsCount);
+          const nominalTotal = prev.baseSessionPrice * sessions;
+          
+          let discountPercent = 0;
+          if (nominalTotal > 0 && newFinalPrice < nominalTotal) {
+            discountPercent = Number((((nominalTotal - newFinalPrice) / nominalTotal) * 100).toFixed(2));
+          }
+
+          let autoInstText = p.installmentText;
+          if (p.installmentsCount > 1) {
+            const valParcel = (newFinalPrice / p.installmentsCount).toFixed(2).replace('.', ',');
+            autoInstText = `Em ${p.installmentsCount}x de R$ ${valParcel}`;
+          } else {
+            autoInstText = 'Pagamento único por sessão';
+          }
+
+          return {
+            ...p,
+            finalPrice: newFinalPrice,
+            discountPercent,
+            installmentText: autoInstText
+          };
+        }
+        return p;
+      })
+    }));
+  };
+
+  // 3. CÁLCULO AUTOMÁTICO VIA VALOR DE CONSULTA / POR SESSÃO (R$)
+  // Ao editar o valor por consulta, multiplica pela quantidade de sessões para gerar o valor final total
+  const handlePlanPricePerSessionChange = (planId: string, newPricePerSession: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const sessions = Math.max(1, p.sessionsCount);
+          const finalPrice = Math.max(0, Math.round(newPricePerSession * sessions));
+          const nominalTotal = prev.baseSessionPrice * sessions;
+          
+          let discountPercent = 0;
+          if (nominalTotal > 0 && finalPrice < nominalTotal) {
+            discountPercent = Number((((nominalTotal - finalPrice) / nominalTotal) * 100).toFixed(2));
+          }
+
+          let autoInstText = p.installmentText;
+          if (p.installmentsCount > 1) {
+            const valParcel = (finalPrice / p.installmentsCount).toFixed(2).replace('.', ',');
+            autoInstText = `Em ${p.installmentsCount}x de R$ ${valParcel}`;
+          } else {
+            autoInstText = 'Pagamento único por sessão';
+          }
+
+          return {
+            ...p,
+            finalPrice,
+            discountPercent,
+            installmentText: autoInstText
+          };
+        }
+        return p;
+      })
+    }));
+  };
+
+  // 4. CÁLCULO AUTOMÁTICO VIA PERCENTUAL DE DESCONTO (%)
+  const handlePlanDiscountPercentChange = (planId: string, newDiscountPercent: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const sessions = Math.max(1, p.sessionsCount);
+          const nominalTotal = prev.baseSessionPrice * sessions;
+          const discountVal = (nominalTotal * newDiscountPercent) / 100;
+          const finalPrice = Math.max(0, Math.round(nominalTotal - discountVal));
+
+          let autoInstText = p.installmentText;
+          if (p.installmentsCount > 1) {
+            const valParcel = (finalPrice / p.installmentsCount).toFixed(2).replace('.', ',');
+            autoInstText = `Em ${p.installmentsCount}x de R$ ${valParcel}`;
+          } else {
+            autoInstText = 'Pagamento único por sessão';
+          }
+
+          return {
+            ...p,
+            finalPrice,
+            discountPercent: Number(newDiscountPercent.toFixed(2)),
+            installmentText: autoInstText
+          };
+        }
+        return p;
+      })
+    }));
+  };
+
+  // 5. CÁLCULO AUTOMÁTICO VIA QUANTIDADE DE SESSÕES
+  const handlePlanSessionsCountChange = (planId: string, newSessionsCount: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          const count = Math.max(1, newSessionsCount);
+          const currentPricePerSession = p.sessionsCount > 0 ? (p.finalPrice / p.sessionsCount) : prev.baseSessionPrice;
+          const finalPrice = Math.round(currentPricePerSession * count);
+          
+          let autoInstText = p.installmentText;
+          if (p.installmentsCount > 1) {
+            const valParcel = (finalPrice / p.installmentsCount).toFixed(2).replace('.', ',');
+            autoInstText = `Em ${p.installmentsCount}x de R$ ${valParcel}`;
+          }
+
+          return {
+            ...p,
+            sessionsCount: count,
+            finalPrice,
+            installmentText: autoInstText
+          };
+        }
+        return p;
+      })
+    }));
+  };
+
+  // 6. Atualizar Parcelas
+  const handlePlanInstallmentsChange = (planId: string, installmentsCount: number) => {
+    setSettings(prev => ({
+      ...prev,
+      plans: prev.plans.map(p => {
+        if (p.id === planId) {
+          let autoInstText = p.installmentText;
+          if (installmentsCount > 1) {
+            const valParcel = (p.finalPrice / installmentsCount).toFixed(2).replace('.', ',');
+            autoInstText = `Em ${installmentsCount}x de R$ ${valParcel}`;
+          } else {
+            autoInstText = 'Pagamento único por sessão';
+          }
+
+          return {
+            ...p,
+            installmentsCount,
+            installmentText: autoInstText
+          };
+        }
+        return p;
+      })
     }));
   };
 
@@ -177,17 +339,22 @@ export default function ConditionsConfig() {
     }
 
     const newId = `custom_p${customCount === 0 ? '4' : '5'}`;
+    const sessions = customCount === 0 ? 24 : 6;
+    const finalPrice = customCount === 0 ? 1800 : 500;
+    const instCount = customCount === 0 ? 6 : 2;
+    const valParcel = (finalPrice / instCount).toFixed(2).replace('.', ',');
+
     const newPlan: PlanConfig = {
       id: newId,
       title: customCount === 0 ? 'Acompanhamento Semestral' : 'Plano Intensivo',
       badge: 'Personalizado',
-      sessionsCount: customCount === 0 ? 24 : 6,
+      sessionsCount: sessions,
       periodDays: customCount === 0 ? 180 : 45,
       periodLabel: customCount === 0 ? '180 dias' : '45 dias',
       discountPercent: 30,
-      finalPrice: customCount === 0 ? 1800 : 500,
-      installmentsCount: customCount === 0 ? 6 : 2,
-      installmentText: customCount === 0 ? 'Em 6x de R$ 300,00' : 'Em 2x de R$ 250,00',
+      finalPrice: finalPrice,
+      installmentsCount: instCount,
+      installmentText: `Em ${instCount}x de R$ ${valParcel}`,
       paymentLink: 'https://pay.kiwify.com.br/',
       description: 'Modalidade estruturada de acompanhamento clínico com suporte continuado.',
       features: [
@@ -243,8 +410,7 @@ export default function ConditionsConfig() {
         }));
       }
     } else {
-      // Plano base: inativa e pergunta se deseja ocultar
-      if (window.confirm(`Este é um dos 4 planos padrão. Deseja inativá-lo para que não apareça no site?`)) {
+      if (window.confirm(`Deseja inativar o plano "${targetPlan.title}" para que não apareça no site?`)) {
         setSettings(prev => ({
           ...prev,
           plans: prev.plans.map(p => p.id === planId ? { ...p, active: false } : p)
@@ -253,25 +419,13 @@ export default function ConditionsConfig() {
     }
   };
 
-  // Atualizar campo genérico de um plano
+  // Atualizar campo genérico de um plano (texto, link, badge, etc.)
   const handlePlanFieldChange = (planId: string, field: keyof PlanConfig, value: any) => {
     setSettings(prev => ({
       ...prev,
       plans: prev.plans.map(p => {
         if (p.id === planId) {
-          const updated = { ...p, [field]: value };
-          // Atualizar cálculo de parcelas se o preço final ou parcelas mudarem
-          if (field === 'finalPrice' || field === 'installmentsCount') {
-            const price = field === 'finalPrice' ? Number(value) : p.finalPrice;
-            const instCount = field === 'installmentsCount' ? Number(value) : p.installmentsCount;
-            if (instCount > 1) {
-              const valParcel = (price / instCount).toFixed(2).replace('.', ',');
-              updated.installmentText = `Em ${instCount}x de R$ ${valParcel}`;
-            } else {
-              updated.installmentText = 'Pagamento único por sessão';
-            }
-          }
-          return updated;
+          return { ...p, [field]: value };
         }
         return p;
       })
@@ -497,14 +651,14 @@ export default function ConditionsConfig() {
               </div>
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
-                  <span>Gestão de Planos & Checkout</span>
+                  <span>Gestão de Planos & Honorários</span>
                   <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30 flex items-center gap-1">
                     <Globe className="w-3 h-3" />
                     <span>Nuvem Global</span>
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  {settings.plans.filter(p => p.active).length} planos ativos no site • {settings.plans.length} cadastrados
+                  {settings.plans.filter(p => p.active).length} planos ativos no site • Cálculos bidirecionais automáticos
                 </p>
               </div>
             </div>
@@ -754,13 +908,13 @@ export default function ConditionsConfig() {
             <div className="max-w-xl">
               <div className="flex items-center gap-2 text-luxury-gold mb-2">
                 <Calculator className="w-5 h-5" />
-                <span className="text-xs font-mono uppercase tracking-widest font-semibold">Parâmetro Base de Cálculo</span>
+                <span className="text-xs font-mono uppercase tracking-widest font-semibold">Base de Referência</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-serif text-white font-semibold">
                 Honorário Base por Sessão Avulsa
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 font-light mt-1 leading-relaxed">
-                Valor de referência por atendimento individual. As parcelas e valores são recalculados automaticamente com base nos valores definidos nos cards abaixo.
+                Valor padrão por atendimento de 50 min. Ao editar os cards abaixo, você pode ajustar tanto pelo <strong className="text-luxury-gold-light">valor total do plano</strong> quanto pelo <strong className="text-luxury-gold-light">valor por consulta</strong> com recálculo automático instantâneo.
               </p>
             </div>
 
@@ -787,7 +941,7 @@ export default function ConditionsConfig() {
           </div>
         </section>
 
-        {/* EDITOR DOS PLANOS (CARDS DE CONFIGURAÇÃO) */}
+        {/* EDITOR DOS PLANOS (CARDS DE CONFIGURAÇÃO BIDIRECIONAL) */}
         <section className="mb-14">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
@@ -795,7 +949,7 @@ export default function ConditionsConfig() {
                 Gestão de Planos ({settings.plans.length} cadastrados)
               </h2>
               <p className="text-xs sm:text-sm text-zinc-400">
-                Ative, inative, adicione, duplique ou exclua planos conforme sua conveniência clínica.
+                Edite pelo valor total ou pelo valor por consulta — todos os campos e parcelas se calculam automaticamente.
               </p>
             </div>
 
@@ -833,9 +987,13 @@ export default function ConditionsConfig() {
 
           {activeTab === 'editor' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {settings.plans.map((plan, index) => {
+              {settings.plans.map((plan) => {
                 const orig = initialSettings.plans.find(p => p.id === plan.id);
                 const isPriceEdited = orig && orig.finalPrice !== plan.finalPrice;
+                const sessions = Math.max(1, plan.sessionsCount);
+                const nominalTotal = settings.baseSessionPrice * sessions;
+                const pricePerSession = (plan.finalPrice / sessions).toFixed(2).replace('.', ',');
+                const savingsNominal = Math.max(0, nominalTotal - plan.finalPrice);
 
                 return (
                   <div 
@@ -927,51 +1085,151 @@ export default function ConditionsConfig() {
                         </div>
                       </div>
 
-                      {/* Bloco de Cálculo & Preços */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-luxury-black/60 p-4 rounded-2xl border border-luxury-gold/15 mb-5">
+                      {/* BLOCO DE CÁLCULO BIDIRECIONAL: VALOR TOTAL E VALOR POR CONSULTA */}
+                      <div className="bg-luxury-black/70 p-4 rounded-2xl border border-luxury-gold/25 mb-5 space-y-4 shadow-inner">
                         
-                        {/* Preço Final */}
-                        <div>
-                          <label className="text-[10px] uppercase font-mono text-zinc-400 block mb-1">
-                            Honorários do Plano (R$)
-                          </label>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-serif text-luxury-gold-light">R$</span>
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                          <span className="text-[11px] font-serif font-semibold text-luxury-gold flex items-center gap-1.5">
+                            <Calculator className="w-3.5 h-3.5" />
+                            <span>Cálculo Automático de Honorários</span>
+                          </span>
+                          <span className="text-[10px] text-zinc-400 font-mono">
+                            Altere qualquer campo
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          
+                          {/* 1. VALOR TOTAL DO PLANO */}
+                          <div>
+                            <label className="text-[10px] uppercase font-mono text-luxury-gold-light block mb-1 font-semibold flex items-center gap-1">
+                              <Coins className="w-3 h-3 text-luxury-gold" />
+                              <span>Valor Total do Plano (R$)</span>
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-serif text-luxury-gold-light">R$</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={plan.finalPrice}
+                                onChange={(e) => handlePlanFinalPriceChange(plan.id, Number(e.target.value) || 0)}
+                                className="w-full bg-luxury-charcoal border border-luxury-gold/50 text-white font-serif text-xl font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-luxury-gold"
+                              />
+                              <span className="text-xs text-zinc-400 font-mono">,00</span>
+                            </div>
+                            <span className="text-[9px] text-zinc-400 font-mono mt-0.5 block">
+                              Valor final cobrado no plano
+                            </span>
+                          </div>
+
+                          {/* 2. VALOR POR CONSULTA / SESSÃO (EDITÁVEL!) */}
+                          <div>
+                            <label className="text-[10px] uppercase font-mono text-emerald-300 block mb-1 font-semibold flex items-center gap-1">
+                              <User className="w-3 h-3 text-emerald-400" />
+                              <span>Valor por Consulta (R$)</span>
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-serif text-emerald-400">R$</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.5"
+                                value={Number((plan.finalPrice / sessions).toFixed(2))}
+                                onChange={(e) => handlePlanPricePerSessionChange(plan.id, Number(e.target.value) || 0)}
+                                className="w-full bg-luxury-charcoal border border-emerald-500/40 text-emerald-200 font-serif text-xl font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-400"
+                              />
+                            </div>
+                            <span className="text-[9px] text-zinc-400 font-mono mt-0.5 block">
+                              {sessions}x consultas = R$ {plan.finalPrice},00
+                            </span>
+                          </div>
+
+                        </div>
+
+                        {/* Controles de Sessões, Desconto % e Parcelas */}
+                        <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/5">
+                          
+                          {/* Qtd Sessões */}
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Qtd. Sessões
+                            </label>
                             <input
                               type="number"
-                              min="0"
-                              step="1"
-                              value={plan.finalPrice}
-                              onChange={(e) => handlePlanFieldChange(plan.id, 'finalPrice', Number(e.target.value) || 0)}
-                              className="w-full bg-luxury-charcoal border border-luxury-gold/40 text-white font-serif text-xl font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-luxury-gold"
+                              min="1"
+                              max="100"
+                              value={plan.sessionsCount}
+                              onChange={(e) => handlePlanSessionsCountChange(plan.id, Number(e.target.value) || 1)}
+                              className="w-full bg-luxury-charcoal border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-2.5 py-2 text-center focus:outline-none focus:border-luxury-gold"
                             />
-                            <span className="text-xs text-zinc-400 font-mono">,00</span>
+                          </div>
+
+                          {/* Desconto % */}
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1 flex items-center gap-0.5">
+                              <span>Desconto</span>
+                              <Percent className="w-2.5 h-2.5 text-luxury-gold" />
+                            </label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                disabled={plan.sessionsCount === 1}
+                                value={plan.discountPercent || 0}
+                                onChange={(e) => handlePlanDiscountPercentChange(plan.id, Number(e.target.value) || 0)}
+                                className={`w-full bg-luxury-charcoal border text-white text-xs font-mono rounded-xl px-2.5 py-2 text-center focus:outline-none ${
+                                  plan.sessionsCount === 1 
+                                    ? 'border-white/10 text-zinc-500 cursor-not-allowed' 
+                                    : 'border-luxury-gold/30 focus:border-luxury-gold'
+                                }`}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Parcelamento */}
+                          <div>
+                            <label className="text-[10px] font-mono text-zinc-400 block mb-1">
+                              Parcelas
+                            </label>
+                            <select
+                              value={plan.installmentsCount}
+                              onChange={(e) => handlePlanInstallmentsChange(plan.id, Number(e.target.value))}
+                              className="w-full bg-luxury-charcoal border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-2 py-2 focus:outline-none focus:border-luxury-gold cursor-pointer"
+                            >
+                              <option value="1">1x (À vista)</option>
+                              <option value="2">2x</option>
+                              <option value="3">3x</option>
+                              <option value="4">4x</option>
+                              <option value="6">6x</option>
+                              <option value="12">12x</option>
+                            </select>
+                          </div>
+
+                        </div>
+
+                        {/* Régua de Métricas Automáticas em Tempo Real */}
+                        <div className="pt-2 border-t border-white/5 grid grid-cols-3 gap-2 text-center">
+                          <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Valor Integral</span>
+                            <span className="text-xs font-mono text-zinc-300">R$ {nominalTotal},00</span>
+                          </div>
+                          <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Economia</span>
+                            <span className="text-xs font-mono text-emerald-400">R$ {savingsNominal},00</span>
+                          </div>
+                          <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+                            <span className="text-[9px] text-zinc-500 font-mono uppercase block">Média Consulta</span>
+                            <span className="text-xs font-mono text-luxury-gold-light">R$ {pricePerSession}</span>
                           </div>
                         </div>
 
-                        {/* Parcelas */}
+                        {/* Texto de Parcelamento Exibido no Card */}
                         <div>
-                          <label className="text-[10px] uppercase font-mono text-zinc-400 block mb-1">
-                            Parcelamento
-                          </label>
-                          <select
-                            value={plan.installmentsCount}
-                            onChange={(e) => handlePlanFieldChange(plan.id, 'installmentsCount', Number(e.target.value))}
-                            className="w-full bg-luxury-charcoal border border-luxury-gold/30 text-white text-xs font-mono rounded-xl px-2.5 py-2.5 focus:outline-none focus:border-luxury-gold cursor-pointer"
-                          >
-                            <option value="1">1x (À vista)</option>
-                            <option value="2">2x</option>
-                            <option value="3">3x</option>
-                            <option value="4">4x</option>
-                            <option value="6">6x</option>
-                            <option value="12">12x</option>
-                          </select>
-                        </div>
-
-                        {/* Texto de Parcelamento Exibido */}
-                        <div className="sm:col-span-2 pt-2 border-t border-white/5">
                           <label className="text-[10px] font-mono text-zinc-400 block mb-1">
-                            Texto de Parcelamento (Card)
+                            Texto de Parcelamento (Exibido no Card)
                           </label>
                           <input
                             type="text"
