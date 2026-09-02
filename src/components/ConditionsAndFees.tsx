@@ -3,25 +3,29 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, 
   FileText, 
-  Calendar, 
   Clock, 
   AlertCircle, 
   ArrowLeft, 
   MessageSquareHeart, 
-  ExternalLink,
-  Lock,
-  Unlock,
-  HeartHandshake,
-  Check,
-  CreditCard,
-  User,
-  Layers,
-  Sparkles,
-  CalendarDays,
-  Shield
+  ExternalLink, 
+  Lock, 
+  Unlock, 
+  HeartHandshake, 
+  Check, 
+  CreditCard, 
+  User, 
+  Calendar, 
+  Layers, 
+  Sparkles, 
+  CalendarDays, 
+  Shield, 
+  Settings 
 } from 'lucide-react';
+import { getPricingSettings, PricingSettings } from '../utils/pricingConfig';
 
 export default function ConditionsAndFees() {
+  const [pricingSettings, setPricingSettings] = useState<PricingSettings>(getPricingSettings);
+
   // Configuração técnica: Garantir meta robots noindex/nofollow dinamicamente
   useEffect(() => {
     let metaRobots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
@@ -35,8 +39,14 @@ export default function ConditionsAndFees() {
     // Rolar ao topo ao carregar a página
     window.scrollTo(0, 0);
 
+    // Listener para atualizações de preço feitas pelo painel de config
+    const handlePricingUpdate = () => {
+      setPricingSettings(getPricingSettings());
+    };
+    window.addEventListener('pricing_config_updated', handlePricingUpdate);
+
     return () => {
-      // Reverter se sair da página
+      window.removeEventListener('pricing_config_updated', handlePricingUpdate);
       if (metaRobots) {
         metaRobots.content = 'index, follow';
       }
@@ -86,6 +96,8 @@ export default function ConditionsAndFees() {
     "Olá, Bruno! Acessei a página de condições e honorários e gostaria de tirar algumas dúvidas sobre as modalidades de acompanhamento."
   );
 
+  const plans = pricingSettings.plans;
+
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
       
@@ -120,15 +132,26 @@ export default function ConditionsAndFees() {
             </div>
           </div>
 
-          <a
-            href={whatsappDirectUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 border border-luxury-gold/30 hover:border-luxury-gold bg-luxury-gold/5 hover:bg-luxury-gold/10 text-luxury-gold-light hover:text-white text-xs font-sans px-4 py-2 rounded-full transition"
-          >
-            <MessageSquareHeart className="w-4 h-4 text-luxury-gold" />
-            <span className="hidden sm:inline">Dúvidas via WhatsApp</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="/condicoes-de-atendimento/config"
+              className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400 hover:text-luxury-gold border border-white/10 hover:border-luxury-gold/30 px-3 py-1.5 rounded-full transition"
+              title="Configurações de Preços"
+            >
+              <Settings className="w-3 h-3" />
+              <span>Configurar</span>
+            </a>
+
+            <a
+              href={whatsappDirectUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 border border-luxury-gold/30 hover:border-luxury-gold bg-luxury-gold/5 hover:bg-luxury-gold/10 text-luxury-gold-light hover:text-white text-xs font-sans px-4 py-2 rounded-full transition"
+            >
+              <MessageSquareHeart className="w-4 h-4 text-luxury-gold" />
+              <span className="hidden sm:inline">Dúvidas via WhatsApp</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -351,10 +374,10 @@ export default function ConditionsAndFees() {
                   {/* Header Row */}
                   <div className="flex items-center justify-between gap-1.5 mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Pontual
+                      {plans.avulsa.badge}
                     </span>
                     <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <Clock className="w-3 h-3 text-luxury-gold" /> 50 min
+                      <Clock className="w-3 h-3 text-luxury-gold" /> {plans.avulsa.periodLabel}
                     </span>
                   </div>
 
@@ -365,10 +388,10 @@ export default function ConditionsAndFees() {
                     </div>
                     <div>
                       <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        Consulta avulsa
+                        {plans.avulsa.title}
                       </h3>
                       <p className="text-[10px] text-zinc-400 font-mono">
-                        1 atendimento individual
+                        {plans.avulsa.sessionsCount} atendimento individual
                       </p>
                     </div>
                   </div>
@@ -380,44 +403,34 @@ export default function ConditionsAndFees() {
                     </div>
                     <div className="flex items-baseline gap-0.5 mt-0.5">
                       <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">147</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.avulsa.finalPrice}</span>
                       <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
                     <div className="mt-1 text-[10px] text-zinc-400 font-mono">
-                      Pagamento único por sessão
+                      {plans.avulsa.installmentText}
                     </div>
                   </div>
 
                   {/* Description */}
                   <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    Indicada para primeiro atendimento, retorno isolado ou para quem deseja conhecer o método antes de iniciar acompanhamento contínuo.
+                    {plans.avulsa.description}
                   </p>
 
                   {/* Features List */}
                   <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>50 minutos de escuta clínica dedicada</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Recibo oficial CRP para reembolso</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Plataforma segura e criptografada</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Agendamento rápido no WhatsApp</span>
-                    </li>
+                    {plans.avulsa.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 {/* Button */}
                 <div>
                   <button
-                    onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/0NHcZTh')}
+                    onClick={() => handleFormalizationClick(plans.avulsa.paymentLink)}
                     className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
@@ -425,7 +438,7 @@ export default function ConditionsAndFees() {
                     }`}
                   >
                     {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar avulsa</span>
+                    <span>Formalizar {plans.avulsa.title.toLowerCase()}</span>
                     <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
@@ -452,10 +465,10 @@ export default function ConditionsAndFees() {
                   {/* Header Row */}
                   <div className="flex items-center justify-between gap-1.5 mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Semanal
+                      {plans.mensal.badge}
                     </span>
                     <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 30 dias
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.mensal.periodLabel}
                     </span>
                   </div>
 
@@ -466,10 +479,10 @@ export default function ConditionsAndFees() {
                     </div>
                     <div>
                       <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        Mensal
+                        {plans.mensal.title}
                       </h3>
                       <p className="text-[10px] text-zinc-400 font-mono">
-                        4 atendimentos no mês
+                        {plans.mensal.sessionsCount} atendimentos no mês
                       </p>
                     </div>
                   </div>
@@ -477,49 +490,39 @@ export default function ConditionsAndFees() {
                   {/* Price Box */}
                   <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
                     <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários (4 Sessões)
+                      Honorários ({plans.mensal.sessionsCount} Sessões)
                     </div>
                     <div className="flex items-baseline gap-0.5 mt-0.5">
                       <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">420</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.mensal.finalPrice}</span>
                       <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
                     <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
                       <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>Em 2x de R$ 210,00</span>
+                      <span>{plans.mensal.installmentText}</span>
                     </div>
                   </div>
 
                   {/* Description */}
                   <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    Indicado para quem deseja iniciar ou manter processo terapêutico semanal, favorecendo continuidade e vínculo clínico.
+                    {plans.mensal.description}
                   </p>
 
                   {/* Features List */}
                   <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>4 sessões individuais (~1x por semana)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Estruturação contínua e vínculo clínico</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Recibo mensal para reembolso convênio</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Horário semanal fixo reservado</span>
-                    </li>
+                    {plans.mensal.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 {/* Button */}
                 <div>
                   <button
-                    onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/Bf7QgxM')}
+                    onClick={() => handleFormalizationClick(plans.mensal.paymentLink)}
                     className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
@@ -527,7 +530,7 @@ export default function ConditionsAndFees() {
                     }`}
                   >
                     {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar mensal</span>
+                    <span>Formalizar {plans.mensal.title.toLowerCase()}</span>
                     <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
@@ -554,10 +557,10 @@ export default function ConditionsAndFees() {
                   {/* Header Row */}
                   <div className="flex items-center justify-between gap-1.5 mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Bimestral
+                      {plans.bimestral.badge}
                     </span>
                     <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 60 dias
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.bimestral.periodLabel}
                     </span>
                   </div>
 
@@ -568,10 +571,10 @@ export default function ConditionsAndFees() {
                     </div>
                     <div>
                       <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        Bimestral
+                        {plans.bimestral.title}
                       </h3>
                       <p className="text-[10px] text-zinc-400 font-mono">
-                        8 atendimentos (2 meses)
+                        {plans.bimestral.sessionsCount} atendimentos (2 meses)
                       </p>
                     </div>
                   </div>
@@ -579,49 +582,39 @@ export default function ConditionsAndFees() {
                   {/* Price Box */}
                   <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
                     <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários (8 Sessões)
+                      Honorários ({plans.bimestral.sessionsCount} Sessões)
                     </div>
                     <div className="flex items-baseline gap-0.5 mt-0.5">
                       <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">740</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.bimestral.finalPrice}</span>
                       <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
                     <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
                       <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>2x R$ 370 ou 4x R$ 185</span>
+                      <span>{plans.bimestral.installmentText}</span>
                     </div>
                   </div>
 
                   {/* Description */}
                   <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    Indicado para maior continuidade, permitindo aprofundar compreensão dos padrões emocionais e comportamentais.
+                    {plans.bimestral.description}
                   </p>
 
                   {/* Features List */}
                   <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>8 atendimentos clínicos em 60 dias</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Aprofundamento de esquemas mentais</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Emissão de recibos mensais oficiais</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Acompanhamento personalizado</span>
-                    </li>
+                    {plans.bimestral.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 {/* Button */}
                 <div>
                   <button
-                    onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/J1OGbSJ')}
+                    onClick={() => handleFormalizationClick(plans.bimestral.paymentLink)}
                     className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
@@ -629,7 +622,7 @@ export default function ConditionsAndFees() {
                     }`}
                   >
                     {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar bimestral</span>
+                    <span>Formalizar {plans.bimestral.title.toLowerCase()}</span>
                     <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
@@ -656,10 +649,10 @@ export default function ConditionsAndFees() {
                   {/* Header Row */}
                   <div className="flex items-center justify-between gap-1.5 mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold-light text-[10px] font-mono uppercase tracking-wider font-semibold">
-                      Trimestral
+                      {plans.trimestral.badge}
                     </span>
                     <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
-                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> 90 dias
+                      <CalendarDays className="w-3 h-3 text-luxury-gold" /> {plans.trimestral.periodLabel}
                     </span>
                   </div>
 
@@ -670,10 +663,10 @@ export default function ConditionsAndFees() {
                     </div>
                     <div>
                       <h3 className="text-lg xl:text-xl font-serif text-white font-semibold leading-tight">
-                        Trimestral
+                        {plans.trimestral.title}
                       </h3>
                       <p className="text-[10px] text-zinc-400 font-mono">
-                        12 atendimentos (3 meses)
+                        {plans.trimestral.sessionsCount} atendimentos (3 meses)
                       </p>
                     </div>
                   </div>
@@ -681,49 +674,39 @@ export default function ConditionsAndFees() {
                   {/* Price Box */}
                   <div className="bg-gradient-to-r from-luxury-black/90 to-[#141620] border border-luxury-gold/25 rounded-xl p-3.5 my-3.5 shadow-inner">
                     <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Honorários (12 Sessões)
+                      Honorários ({plans.trimestral.sessionsCount} Sessões)
                     </div>
                     <div className="flex items-baseline gap-0.5 mt-0.5">
                       <span className="text-xs font-serif text-luxury-gold-light">R$</span>
-                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">960</span>
+                      <span className="text-2xl xl:text-3xl font-serif font-bold text-white tracking-tight">{plans.trimestral.finalPrice}</span>
                       <span className="text-xs font-serif text-luxury-gold-light">,00</span>
                     </div>
                     <div className="mt-1.5 pt-1.5 border-t border-luxury-gold/15 flex items-center gap-1 text-[10px] xl:text-[11px] text-luxury-gold-light font-medium">
                       <CreditCard className="w-3 h-3 text-luxury-gold shrink-0" />
-                      <span>Em 3x de R$ 320,00</span>
+                      <span>{plans.trimestral.installmentText}</span>
                     </div>
                   </div>
 
                   {/* Description */}
                   <p className="text-xs text-zinc-300 font-light leading-relaxed mb-4 min-h-[58px]">
-                    Indicado para estruturar acompanhamento de 3 meses, favorecendo metas clínicas e novos recursos psicológicos.
+                    {plans.trimestral.description}
                   </p>
 
                   {/* Features List */}
                   <ul className="space-y-2 mb-6 text-[11px] text-zinc-300 font-light border-t border-luxury-gold/10 pt-3">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>12 atendimentos clínicos em 90 dias</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Plano Clínico Integrativo estruturado</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Treinamento de Habilidades Psicológicas</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
-                      <span>Recibos mensais para reembolso</span>
-                    </li>
+                    {plans.trimestral.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-luxury-gold shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 {/* Button */}
                 <div>
                   <button
-                    onClick={() => handleFormalizationClick('https://pay.kiwify.com.br/59UayeX')}
+                    onClick={() => handleFormalizationClick(plans.trimestral.paymentLink)}
                     className={`w-full flex items-center justify-center gap-1.5 py-3.5 px-3 rounded-xl text-[11px] xl:text-xs uppercase tracking-wider font-semibold transition-all duration-300 cursor-pointer ${
                       isAllChecked
                         ? 'bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black hover:brightness-110 shadow-lg shadow-luxury-gold/15 active:scale-[0.98]'
@@ -731,7 +714,7 @@ export default function ConditionsAndFees() {
                     }`}
                   >
                     {isAllChecked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>Formalizar trimestral</span>
+                    <span>Formalizar {plans.trimestral.title.toLowerCase()}</span>
                     <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
                   </button>
                   {!isAllChecked && (
