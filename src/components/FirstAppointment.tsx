@@ -2,24 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, 
-  FileText, 
   Clock, 
   AlertCircle, 
   ArrowLeft, 
-  MessageSquareHeart, 
   ExternalLink, 
   Lock, 
   Unlock, 
-  HeartHandshake, 
   Check, 
   CreditCard, 
   User, 
-  Calendar, 
-  Layers, 
   Sparkles, 
   Shield, 
-  Smartphone,
-  Receipt
+  Smartphone
 } from 'lucide-react';
 import { 
   fetchPricingSettingsFromCloud, 
@@ -101,10 +95,6 @@ export default function FirstAppointment() {
     window.open(paymentUrl, '_blank');
   };
 
-  const whatsappDirectUrl = "https://wa.me/5521975249514?text=" + encodeURIComponent(
-    "Olá, Bruno! Gostaria de tirar algumas dúvidas antes de contratar meu primeiro atendimento psicológico."
-  );
-
   // Localizar o plano definido como Primeiro Atendimento
   const firstAppointmentPlan: PlanConfig = 
     pricingSettings.plans.find(p => p.id === (pricingSettings.firstAppointmentPlanId || 'avulsa')) ||
@@ -126,7 +116,7 @@ export default function FirstAppointment() {
               className="flex items-center gap-1.5 text-xs text-luxury-gold-light hover:text-white transition font-medium mr-2 group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition duration-200" />
-              <span className="hidden sm:inline">Voltar à apresentação</span>
+              <span>Voltar à apresentação</span>
             </a>
             <div className="w-10 h-10 rounded-full border border-luxury-gold/40 flex items-center justify-center bg-[#07090f] overflow-hidden shrink-0 shadow-md">
               <img 
@@ -143,18 +133,6 @@ export default function FirstAppointment() {
                 Psicólogo Clínico • CRP 05/75885
               </p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <a
-              href={whatsappDirectUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 border border-luxury-gold/30 hover:border-luxury-gold bg-luxury-gold/5 hover:bg-luxury-gold/10 text-luxury-gold-light hover:text-white text-xs font-sans px-4 py-2 rounded-full transition"
-            >
-              <MessageSquareHeart className="w-4 h-4 text-luxury-gold" />
-              <span className="hidden sm:inline">Dúvidas via WhatsApp</span>
-            </a>
           </div>
         </div>
       </header>
@@ -336,7 +314,7 @@ export default function FirstAppointment() {
         </section>
 
         {/* CARD ÚNICO DO PRIMEIRO ATENDIMENTO */}
-        <section className="max-w-xl mx-auto mb-12">
+        <section className="max-w-xl mx-auto mb-16">
           
           <div className="relative group rounded-3xl p-[1px] bg-gradient-to-b from-luxury-gold/60 via-luxury-gold/30 to-luxury-gold/10 shadow-2xl hover:shadow-luxury-gold/20 transition duration-500">
             <div className="relative bg-gradient-to-b from-[#181a24] via-[#101218] to-[#0a0b0f] rounded-[23px] p-6 sm:p-8 overflow-hidden">
@@ -436,42 +414,8 @@ export default function FirstAppointment() {
 
         </section>
 
-        {/* LINK PARA OUTRAS MODALIDADES DE PLANOS */}
-        <section className="text-center max-w-md mx-auto mb-14">
-          <p className="text-xs text-zinc-400 mb-2">
-            Procura por acompanhamento mensal ou continuado com condições estruturadas?
-          </p>
-          <a
-            href="/condicoes-de-atendimento"
-            className="inline-flex items-center gap-1.5 text-xs text-luxury-gold-light hover:text-white font-medium underline underline-offset-4 transition"
-          >
-            <span>Conhecer outras modalidades de acompanhamento</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        </section>
-
-        {/* CANAL DE DÚVIDAS */}
-        <section className="text-center bg-gradient-to-b from-luxury-charcoal/60 to-luxury-black border border-luxury-gold/20 rounded-3xl p-8 mb-12 shadow-xl">
-          <HeartHandshake className="w-9 h-9 text-luxury-gold mx-auto mb-2" />
-          <h3 className="text-base sm:text-lg font-serif text-white font-semibold mb-1">
-            Precisa tirar alguma dúvida antes de iniciar?
-          </h3>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto mb-5 font-light">
-            Converse diretamente com o psicólogo pelo WhatsApp para verificar horários ou esclarecer o funcionamento das sessões online.
-          </p>
-          <a
-            href={whatsappDirectUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider px-6 py-3 rounded-full shadow-lg hover:brightness-110 active:scale-95 transition"
-          >
-            <MessageSquareHeart className="w-4 h-4" />
-            <span>Falar no WhatsApp</span>
-          </a>
-        </section>
-
         {/* RODAPÉ */}
-        <footer className="text-center pt-6 border-t border-white/10 text-[11px] text-zinc-500 font-mono space-y-1">
+        <footer className="text-center pt-8 border-t border-white/10 text-[11px] text-zinc-500 font-mono space-y-1">
           <p>Bruno de Oliveira Lima • Psicólogo Clínico • CRP 05/75885</p>
           <p>Atendimento psicológico online regularizado pelo Conselho Federal de Psicologia (e-Psi).</p>
         </footer>

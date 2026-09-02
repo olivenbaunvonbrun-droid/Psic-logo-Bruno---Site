@@ -18,16 +18,11 @@ import {
   Receipt,
   Smartphone,
   ShieldCheck,
-  X,
-  FileText
+  X
 } from 'lucide-react';
 
 export default function LandPage() {
   const [modalOpen, setModalOpen] = useState(false);
-
-  const whatsappDirectUrl = "https://wa.me/5521975249514?text=" + encodeURIComponent(
-    "Olá, Bruno! Acessei sua página de atendimento e gostaria de conversar para esclarecer algumas dúvidas antes de iniciar."
-  );
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -41,18 +36,13 @@ export default function LandPage() {
     window.scrollTo(0, 0);
   };
 
-  const handleOpenWhatsAppFromModal = () => {
-    window.open(whatsappDirectUrl, '_blank');
-    setModalOpen(false);
-  };
-
   // State para o Mini-FAQ interativo
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const faqItems = [
     {
       question: "Como funciona a consulta de psicologia online?",
-      answer: "A sessão acontece por videochamada individual em uma plataforma segura e com sigilo absoluto. Você recebe um link exclusivo diretamente no seu WhatsApp e pode entrar com apenas um clique pelo seu celular, computador ou tablet, sem precisar instalar programas complicados."
+      answer: "A sessão acontece por videochamada individual em uma plataforma segura e com sigilo absoluto. Você recebe um link exclusivo diretamente e pode entrar com apenas um clique pelo seu celular, computador ou tablet, sem precisar instalar programas complicados."
     },
     {
       question: "Posso solicitar reembolso ao meu plano de saúde / convênio?",
@@ -597,7 +587,7 @@ export default function LandPage() {
           </div>
         </section>
 
-        {/* SEÇÃO 9: FINALIZAÇÃO & SUPORTE */}
+        {/* SEÇÃO 9: FINALIZAÇÃO */}
         <section className="py-24 bg-gradient-to-b from-luxury-charcoal to-luxury-black px-6 text-center">
           <div className="max-w-3xl mx-auto flex flex-col items-center">
             
@@ -641,24 +631,8 @@ export default function LandPage() {
               </motion.button>
             </div>
 
-            {/* Dúvidas / Suporte Direto */}
-            <div className="mt-14 pt-10 border-t border-luxury-gold/15 w-full">
-              <p className="text-xs sm:text-sm text-luxury-text-muted font-light mb-3">
-                Possui alguma dúvida específica sobre o formato das sessões ou horários disponíveis?
-              </p>
-              <a
-                href={whatsappDirectUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold-light hover:text-white px-6 py-3 rounded-full text-xs font-semibold uppercase tracking-wider transition duration-300"
-              >
-                <span>Tirar dúvidas pelo WhatsApp</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
             {/* Logo Marca */}
-            <div className="mt-12 opacity-80">
+            <div className="mt-16 opacity-80">
               <div className="w-12 h-12 rounded-full border border-luxury-gold/30 flex items-center justify-center mx-auto bg-luxury-black p-1">
                 <img 
                   src="/media__1779535801913.png" 
@@ -732,37 +706,29 @@ export default function LandPage() {
                   A psicoterapia não oferece promessa automática de resultado, mas pode favorecer compreensão, elaboração emocional, identificação de padrões e desenvolvimento gradual de recursos psicológicos para lidar com a vida de forma mais consciente.
                 </p>
                 <p>
-                  Antes de iniciar o acompanhamento, você poderá conhecer as modalidades de organização do atendimento, os honorários profissionais e as condições gerais de contratação.
+                  Antes de iniciar o acompanhamento, você poderá conhecer a estrutura da consulta, os honorários profissionais e as condições de contratação.
                 </p>
                 <p className="p-3 bg-luxury-black/40 rounded-xl border border-luxury-gold/15 text-[#dfcaa7] italic">
                   Essas informações são apresentadas com finalidade de transparência, não como promoção, desconto, oferta comercial ou garantia de resultado.
                 </p>
                 <p>
-                  Você pode seguir para a página de modalidades ou falar diretamente pelo WhatsApp para esclarecer dúvidas antes de prosseguir.
+                  Você poderá seguir para a página de contratação do seu primeiro atendimento com total clareza e segurança.
                 </p>
               </div>
 
-              {/* Botões do Modal */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-luxury-gold/15">
+              {/* Botão do Modal */}
+              <div className="pt-2 border-t border-luxury-gold/15">
                 <button
                   onClick={handleNavigateToFirstAppointment}
-                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light hover:brightness-110 active:scale-95 text-luxury-black font-semibold text-xs sm:text-sm uppercase tracking-wider py-4 px-4 rounded-xl shadow-lg transition cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Contratar meu primeiro atendimento</span>
                 </button>
-
-                <button
-                  onClick={handleOpenWhatsAppFromModal}
-                  className="flex items-center justify-center gap-2 border border-luxury-gold/40 hover:border-luxury-gold text-luxury-gold-light hover:text-white text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl transition cursor-pointer"
-                >
-                  <MessageSquareHeart className="w-4 h-4" />
-                  <span>Falar pelo WhatsApp</span>
-                </button>
               </div>
 
               {/* Informação sobre o WhatsApp */}
-              <p className="text-[11px] text-zinc-400 text-center font-sans mt-3">
+              <p className="text-[11px] text-zinc-400 text-center font-sans mt-3.5">
                 <strong className="text-luxury-gold-light">Importante:</strong> Após a confirmação do pagamento, você será redirecionado para o WhatsApp do psicólogo para alinhamento e agendamento da sessão.
               </p>
 
