@@ -12,6 +12,7 @@ import {
   CreditCard, 
   Link as LinkIcon, 
   Eye, 
+  EyeOff,
   Clock, 
   User, 
   Calendar, 
@@ -28,7 +29,10 @@ import {
   Upload,
   Info,
   ShieldAlert,
-  X
+  X,
+  LogOut,
+  KeyRound,
+  Mail
 } from 'lucide-react';
 import { 
   PricingSettings, 
@@ -38,7 +42,31 @@ import {
   PlanConfig
 } from '../utils/pricingConfig';
 
+// Credenciais de acesso administrativo
+const ADMIN_CREDENTIALS = {
+  // Aceita o email fornecido pelo usuário (e também a variação com 1 'l')
+  validEmails: ['olivenbaunvonbrun@gmaill.com', 'olivenbaunvonbrun@gmail.com'],
+  password: 'Bruno@383991Br@Psicologia'
+};
+
+const AUTH_STORAGE_KEY = 'bruno_psico_config_auth_session_v1';
+
 export default function ConditionsConfig() {
+  // Estado de Autenticação
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(AUTH_STORAGE_KEY) === 'authenticated';
+    }
+    return false;
+  });
+
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
+
+  // Estados do Dashboard
   const [initialSettings] = useState<PricingSettings>(getPricingSettings);
   const [settings, setSettings] = useState<PricingSettings>(getPricingSettings);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -62,6 +90,38 @@ export default function ConditionsConfig() {
   }, []);
 
   const planKeys: (keyof PricingSettings['plans'])[] = ['avulsa', 'mensal', 'bimestral', 'trimestral'];
+
+  // Processar tentativa de login
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsSubmittingLogin(true);
+
+    const emailTrimmed = loginEmail.trim().toLowerCase();
+    const passTrimmed = loginPassword.trim();
+
+    const isEmailValid = ADMIN_CREDENTIALS.validEmails.includes(emailTrimmed);
+    const isPassValid = passTrimmed === ADMIN_CREDENTIALS.password;
+
+    setTimeout(() => {
+      if (isEmailValid && isPassValid) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem(AUTH_STORAGE_KEY, 'authenticated');
+        setLoginError('');
+      } else {
+        setLoginError('Email ou senha incorretos. Verifique as credenciais e tente novamente.');
+      }
+      setIsSubmittingLogin(false);
+    }, 400);
+  };
+
+  // Logout
+  const handleLogout = () => {
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    setIsAuthenticated(false);
+    setLoginPassword('');
+    setLoginError('');
+  };
 
   // Verificar quais planos tiveram seus preços alterados em relação aos salvos
   const modifiedPricePlans = planKeys.filter(
@@ -232,6 +292,143 @@ export default function ConditionsConfig() {
     downloadAnchor.remove();
   };
 
+  // =========================================================================
+  // TELA 1: LOGIN DE ACESSO ADMINISTRATIVO
+  // =========================================================================
+  if (!isAuthenticated) {
+    return (
+      <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white flex flex-col items-center justify-center p-6 selection:bg-luxury-gold selection:text-luxury-black overflow-hidden">
+        
+        {/* Background patterned dots overlay */}
+        <div className="absolute inset-0 opacity-[0.06] pointer-events-none elegant-dots z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-luxury-gold/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 w-full max-w-md">
+          
+          {/* Card de Login */}
+          <div className="bg-gradient-to-b from-luxury-charcoal/95 to-luxury-black/95 border border-luxury-gold/30 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md">
+            
+            {/* Logo e Cabeçalho */}
+            <div className="text-center mb-8">
+              <div className="mx-auto w-16 h-16 rounded-full border border-luxury-gold/40 flex items-center justify-center bg-[#07090f] overflow-hidden mb-4 shadow-xl">
+                <img 
+                  src="/media__1779535801913.png" 
+                  alt="Logo Bruno de Oliveira" 
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+
+              <h2 className="text-xl sm:text-2xl font-serif text-white font-semibold tracking-tight">
+                Painel Administrativo
+              </h2>
+              <p className="text-xs text-luxury-gold-light font-mono mt-1">
+                Acesso restrito às configurações de honorários
+              </p>
+            </div>
+
+            {/* Formulário */}
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              
+              {/* Campo Email */}
+              <div>
+                <label className="text-[11px] font-mono text-zinc-300 block mb-1.5 uppercase">
+                  Email de Acesso
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="seu.email@exemplo.com"
+                    className="w-full bg-black/60 border border-luxury-gold/30 text-white text-xs font-sans rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-luxury-gold transition"
+                  />
+                </div>
+              </div>
+
+              {/* Campo Senha */}
+              <div>
+                <label className="text-[11px] font-mono text-zinc-300 block mb-1.5 uppercase">
+                  Senha
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••••••••••"
+                    className="w-full bg-black/60 border border-luxury-gold/30 text-white text-xs font-sans rounded-xl pl-10 pr-11 py-3 focus:outline-none focus:border-luxury-gold transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
+                    title={showPassword ? "Ocultar senha" : "Ver senha"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Alerta de Erro */}
+              {loginError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs flex items-center gap-2.5"
+                >
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{loginError}</span>
+                </motion.div>
+              )}
+
+              {/* Botão Entrar */}
+              <button
+                type="submit"
+                disabled={isSubmittingLogin}
+                className="w-full mt-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-luxury-gold-dark via-luxury-gold to-luxury-gold-light text-luxury-black font-semibold text-xs uppercase tracking-wider shadow-lg shadow-luxury-gold/20 hover:brightness-110 active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isSubmittingLogin ? (
+                  <span>Verificando credenciais...</span>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Acessar Configurações</span>
+                  </>
+                )}
+              </button>
+
+            </form>
+
+            {/* Link Voltar */}
+            <div className="mt-6 pt-5 border-t border-white/10 text-center">
+              <a
+                href="/condicoes-de-atendimento"
+                className="text-xs text-zinc-400 hover:text-luxury-gold transition inline-flex items-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Voltar à página pública de planos</span>
+              </a>
+            </div>
+
+          </div>
+
+          <p className="text-center text-[11px] text-zinc-600 font-mono mt-6">
+            Bruno de Oliveira Lima • Psicólogo Clínico • CRP 05/75885
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // TELA 2: PAINEL DE CONFIGURAÇÕES AUTENTICADO
+  // =========================================================================
   return (
     <div className="relative w-full min-h-screen bg-luxury-black font-sans text-white overflow-hidden selection:bg-luxury-gold selection:text-luxury-black">
       
@@ -258,12 +455,12 @@ export default function ConditionsConfig() {
               <div>
                 <h1 className="font-serif text-white font-semibold text-sm sm:text-base tracking-wide leading-tight flex items-center gap-2">
                   <span>Configurações de Planos & Checkout</span>
-                  <span className="bg-luxury-gold/20 text-luxury-gold text-[10px] px-2 py-0.5 rounded-md font-mono">
-                    Painel
+                  <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-mono border border-emerald-500/30">
+                    Sessão Ativa
                   </span>
                 </h1>
                 <p className="text-[10px] sm:text-xs text-luxury-gold-light font-mono">
-                  Edição de honorários, descontos automáticos e links de contratação
+                  Logado como: olivenbaunvonbrun@gmaill.com
                 </p>
               </div>
             </div>
@@ -294,6 +491,15 @@ export default function ConditionsConfig() {
             >
               <Save className="w-4 h-4" />
               <span>Salvar Alterações</span>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-zinc-400 hover:text-red-400 bg-red-950/30 hover:bg-red-950/60 border border-red-500/30 px-3.5 py-2 rounded-xl text-xs transition cursor-pointer ml-1"
+              title="Encerrar sessão de configuração"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
 
